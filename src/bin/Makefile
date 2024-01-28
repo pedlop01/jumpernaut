@@ -1,10 +1,12 @@
 PLATFORM := $(shell uname -o)
+$(info PLATFORM is $(PLATFORM))
+
 ifeq  ($(PLATFORM),GNU/Linux)
-rick2: ../src/main.cpp world.o keyboard.o camera.o camera_view.o sprite.o animation.o character.o player.o enemy.o colbox.o timer.o object.o platform.o item.o laser.o shoot.o bomb.o static_object.o block.o hazard.o checkpoint.o trigger.o enemy_ia.o sound_handler.o pugixml.o
-	g++ -o rick2 ../src/main.cpp world.o keyboard.o camera.o camera_view.o sprite.o animation.o character.o player.o enemy.o colbox.o timer.o object.o platform.o item.o laser.o shoot.o bomb.o static_object.o block.o hazard.o checkpoint.o trigger.o enemy_ia.o sound_handler.o pugixml.o -O3 -std=c++11 `pkg-config --libs allegro-5 allegro_primitives-5 allegro_image-5 allegro_font-5 allegro_ttf-5 allegro_audio-5 allegro_acodec-5`
+rick2: ../src/main.cpp world.o keyboard.o camera.o camera_view.o sprite.o animation.o character.o player.o enemy.o colbox.o timer.o object.o platform.o item.o laser.o shoot.o bomb.o static_object.o block.o hazard.o checkpoint.o trigger.o enemy_ia.o sound_handler.o pugixml.o json_file.o
+	g++ -o rick2 ../src/main.cpp world.o keyboard.o camera.o camera_view.o sprite.o animation.o character.o player.o enemy.o colbox.o timer.o object.o platform.o item.o laser.o shoot.o bomb.o static_object.o block.o hazard.o checkpoint.o trigger.o enemy_ia.o sound_handler.o pugixml.o json_file.o -O3 -std=c++11 `pkg-config --libs allegro-5 allegro_primitives-5 allegro_image-5 allegro_font-5 allegro_ttf-5 allegro_audio-5 allegro_acodec-5`
 else
-rick2: ../src/main.cpp world.o keyboard.o camera.o camera_view.o sprite.o animation.o character.o player.o enemy.o colbox.o timer.o object.o platform.o item.o laser.o shoot.o bomb.o static_object.o block.o hazard.o checkpoint.o trigger.o enemy_ia.o sound_handler.o pugixml.o
-	g++ -o rick2 ../src/main.cpp world.o keyboard.o camera.o camera_view.o sprite.o animation.o character.o player.o enemy.o colbox.o timer.o object.o platform.o item.o laser.o shoot.o bomb.o static_object.o block.o hazard.o checkpoint.o trigger.o enemy_ia.o sound_handler.o pugixml.o -O3 -std=c++11 -static -lallegro-5.0.10-monolith-md
+rick2: ../src/main.cpp world.o keyboard.o camera.o camera_view.o sprite.o animation.o character.o player.o enemy.o colbox.o timer.o object.o platform.o item.o laser.o shoot.o bomb.o static_object.o block.o hazard.o checkpoint.o trigger.o enemy_ia.o sound_handler.o pugixml.o json_file.o 
+	g++ -o rick2 ../src/main.cpp world.o keyboard.o camera.o camera_view.o sprite.o animation.o character.o player.o enemy.o colbox.o timer.o object.o platform.o item.o laser.o shoot.o bomb.o static_object.o block.o hazard.o checkpoint.o trigger.o enemy_ia.o sound_handler.o pugixml.o json_file.o -O3 -std=c++11 -static -lallegro-5.0.10-monolith-md
 endif
 
 world.o: ../src/world.cpp
@@ -81,6 +83,9 @@ sound_handler.o: ../src/sound_handler.cpp
 
 pugixml.o: ../src/pugixml.cpp
 	g++ -c ../src/pugixml.cpp
+
+json_file.o: ../src/utils/json_file.cpp
+	g++ -std=c++11 -c ../src/utils/json_file.cpp
 
 clean:
 	rm -f *.o rick2

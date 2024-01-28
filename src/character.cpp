@@ -100,26 +100,26 @@ Character::Character(const char* file) {
   // Initialize animations
   pugi::xml_parse_result result = character_file.load_file(file);
   if(!result) {
-      printf("Error: loading character data from file = %s, description = %s\n", file, result.description());
+      //printf("Error: loading character data from file = %s, description = %s\n", file, result.description());
   }
 
   // REVISIT: states are taking in order from the file. It would be better to find
   // a way to insert them by id instead. However, giving an id to the xml
   // state also requires synchronizing with the state id in the code.
 
-  printf("- Initializing player:\n");
+  ////printf("- Initializing player:\n");
   // Iterate over states
   int num_anims = 0;
   for (pugi::xml_node state = character_file.child("character").child("states").first_child();
        state; state = state.next_sibling()) {
-    printf("State name = %s, id = %d\n", state.attribute("name").as_string(), state.attribute("id").as_int());
+    ////printf("State name = %s, id = %d\n", state.attribute("name").as_string(), state.attribute("id").as_int());
     // Create state
     pugi::xml_node animation = state.child("animation");
     // Create animation and attach to state
-    printf("\tAnimation %d: file = %s, speed = %d\n", num_anims, animation.attribute("bitmap").as_string(), animation.attribute("speed").as_int());
+    ////printf("\tAnimation %d: file = %s, speed = %d\n", num_anims, animation.attribute("bitmap").as_string(), animation.attribute("speed").as_int());
     ALLEGRO_BITMAP* anim_bitmap = al_load_bitmap(animation.attribute("bitmap").as_string());
     if (!anim_bitmap) {
-      printf("Error: failed to load animation bitmap\n");
+      //printf("Error: failed to load animation bitmap\n");
     }
     Animation* player_anim = new Animation(anim_bitmap, animation.attribute("speed").as_int());
     int num_sprites = 0;
@@ -130,11 +130,11 @@ Character::Character(const char* file) {
       int sprite_width  = sprite.attribute("width").as_int();
       int sprite_height = sprite.attribute("height").as_int();
 
-      printf("\t\tSprite %d: x = %d, y = %d, width = %d, height = %d\n", num_sprites,
-                                                                         sprite_x,
-                                                                         sprite_y,
-                                                                         sprite_width,
-                                                                         sprite_height);
+      //printf("\t\tSprite %d: x = %d, y = %d, width = %d, height = %d\n", num_sprites,
+                                                                        //  sprite_x,
+                                                                        //  sprite_y,
+                                                                        //  sprite_width,
+                                                                        //  sprite_height);
 
       ALLEGRO_BITMAP* sprite_bitmap = al_create_sub_bitmap(anim_bitmap, sprite_x, sprite_y, sprite_width, sprite_height);
       al_convert_mask_to_alpha(sprite_bitmap, al_map_rgb(255,0,255));
@@ -384,7 +384,7 @@ void Character::ComputeCollisions(World* map) {
   int down_right_x;
   int down_y;
 
-  //printf("[ComputeCollisions] state = %d\n", state);
+  ////printf("[ComputeCollisions] state = %d\n", state);
 
   // Do not check collisions when DYING
   if ((state == CHAR_STATE_DYING) || (state == CHAR_STATE_DEAD)) return;
@@ -396,7 +396,7 @@ void Character::ComputeCollisions(World* map) {
   this->GetCollisionsInternalHeightBoxExt(map, heightColExt);  
 
   // First check if there is collision with an object over the tiles
-  //printf("[ComputeCollisions] Checking collisions with platforms\n");
+  ////printf("[ComputeCollisions] Checking collisions with platforms\n");
   vector<Platform*> *platforms = map->GetPlatforms();
   for (vector<Platform*>::iterator it = platforms->begin() ; it != platforms->end(); ++it) {
     down_left_x = pos_x;
@@ -417,7 +417,7 @@ void Character::ComputeCollisions(World* map) {
     }
   } 
 
-  //printf("[ComputeCollisions] Getting simple collisions checks\n");
+  ////printf("[ComputeCollisions] Getting simple collisions checks\n");
   // Check if there is a collision with the tiles
   inStairs = ((heightColInt.GetLeftUpCol() == TILE_STAIRS) ||
               (heightColInt.GetRightUpCol() == TILE_STAIRS) ||
@@ -481,7 +481,7 @@ void Character::ComputeNextState(World* map, Keyboard& keyboard) {
   // Save current direction before computing next state and direction
   prevDirection = direction;
 
-  //printf("Pre: State = %d, direction = %d, face = %d\n", state, direction, face);
+  ////printf("Pre: State = %d, direction = %d, face = %d\n", state, direction, face);
 
   // No matter what is the state update, if rick is being killed, then
   // the kill takes precedence
@@ -728,14 +728,14 @@ void Character::ComputeNextState(World* map, Keyboard& keyboard) {
     face = CHAR_DIR_RIGHT;
   }
 
-  //printf("Post: State = %d, direction = %d, face = %d\n", state, direction, face);
-  //printf("Steps in state = %d, steps in direction x = %d, steps in direction y = %d\n", stepsInState, stepsInDirectionX, stepsInDirectionY);
+  ////printf("Post: State = %d, direction = %d, face = %d\n", state, direction, face);
+  ////printf("Steps in state = %d, steps in direction x = %d, steps in direction y = %d\n", stepsInState, stepsInDirectionX, stepsInDirectionY);
 }
 
 void Character::ComputeNextPosition(World* map) {
   int direction_old;
-  //printf("PRE: pos_x = %d pos_y %d\n", pos_x, pos_y);
-  //printf("pos_x = %d, pos_y = %d, speed_x = %f, speed_y = %f\n", pos_x, pos_y, speed_x, speed_y);
+  ////printf("PRE: pos_x = %d pos_y %d\n", pos_x, pos_y);
+  ////printf("pos_x = %d, pos_y = %d, speed_x = %f, speed_y = %f\n", pos_x, pos_y, speed_x, speed_y);
 
   // First check if on platform
   // REVISIT: platform should be revisited once they will be properly implemented
@@ -832,7 +832,7 @@ void Character::ComputeNextPosition(World* map) {
   if (stop_move_block_col) {
     direction = direction_old;
   }
-  //printf("POST: pos_x = %d pos_y %d\n", pos_x, pos_y);
+  ////printf("POST: pos_x = %d pos_y %d\n", pos_x, pos_y);
 }
 
 void Character::ComputeNextPositionBasedOnBlocks(World* map, Keyboard& keyboard) {
@@ -916,7 +916,7 @@ void Character::ComputeNextSpeed() {
       break;
   }
 
-  //printf("speed_y = %f\n", speed_y);
+  ////printf("speed_y = %f\n", speed_y);
 }
 
 void Character::ComputeNextSound() {
@@ -938,23 +938,23 @@ void Character::ComputeNextSound() {
 
 void Character::CharacterStep(World* map, Keyboard& keyboard) {
   // Collisions with world and platforms
-  //printf("[CharacterStep] ComputeCollisions\n");
+  ////printf("[CharacterStep] ComputeCollisions\n");
   this->ComputeCollisions(map);
   this->ComputeCollisionBlocks(map);
   // Compute next state
-  //printf("[CharacterStep] ComputeNextState\n");
+  ////printf("[CharacterStep] ComputeNextState\n");
   this->ComputeNextState(map, keyboard);
   // Compute next position 
-  //printf("[CharacterStep] ComputeNextPosition\n");
+  ////printf("[CharacterStep] ComputeNextPosition\n");
   this->ComputeNextPositionBasedOnBlocks(map, keyboard);
   this->ComputeNextPosition(map);
   // Compute sound based on state
   this->ComputeNextSound();
   // Re-calulate speed
-  //printf("[CharacterStep] ComputeNextSpeed\n");
+  ////printf("[CharacterStep] ComputeNextSpeed\n");
   this->ComputeNextSpeed();
   // Compute next animation frame
-  //printf("[CharacterStep] ComputeNextAnimation\n");
+  ////printf("[CharacterStep] ComputeNextAnimation\n");
   if (direction == CHAR_DIR_STOP)
     animations[state]->ResetAnim();
   else if (state != CHAR_STATE_DEAD)
@@ -966,7 +966,7 @@ void Character::CharacterStep(World* map, Keyboard& keyboard) {
   else if (state == CHAR_STATE_DEAD)
     animation_scaling_factor = 1.0;
   
-  //printf("[CharacterStep] End CharacterStep\n");
+  ////printf("[CharacterStep] End CharacterStep\n");
 }
 
 ALLEGRO_BITMAP* Character::GetCurrentAnimationBitmap() {

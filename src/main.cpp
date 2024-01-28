@@ -43,47 +43,47 @@ int main(int argc, char *argv[]) {
 
   // Check arguments
   if(argc != 1) {
-    printf("Error: wrong parameters. Usage: XXXX\n");
+    //printf("Error: wrong parameters. Usage: XXXX\n");
     exit(-1);
   }
 
   // allegro initializations
   if(!al_init()) {
-    printf("Error: failed to initialize allegro!\n");
+    //printf("Error: failed to initialize allegro!\n");
     return -1;
   }
 
   if(!al_install_keyboard()) {
-    printf("Error: failed to initialize keyboard!\n");
+    //printf("Error: failed to initialize keyboard!\n");
     return -1;
   }
 
   if(!al_install_mouse()) {
-    printf("Error: failed to initialize keyboard!\n");
+    //printf("Error: failed to initialize keyboard!\n");
     return -1;
   }
 
   al_set_new_display_flags(ALLEGRO_WINDOWED);
   display = al_create_display(SCREEN_X, SCREEN_Y);
   if(!display) {
-    printf("Error: failed to create display!\n");
+    //printf("Error: failed to create display!\n");
     return -1;
   }
 
   if(!al_init_image_addon()) {
-    printf("Error: failed to load image addon!\n");
+    //printf("Error: failed to load image addon!\n");
     return -1;
   }
 
   bitmap = al_create_bitmap(SCREEN_X, SCREEN_Y);
   if(!bitmap) {
-    printf("Error: failed to create bitmap!\n");
+    //printf("Error: failed to create bitmap!\n");
     al_destroy_display(display);
     return -1;
   }
 
   if(!al_init_primitives_addon()) {
-    printf("Error: failed to initialize allegro primitives!\n");
+    //printf("Error: failed to initialize allegro primitives!\n");
     return -1;
   }
 
@@ -93,22 +93,22 @@ int main(int argc, char *argv[]) {
   ALLEGRO_FONT *font = al_load_ttf_font("../fonts/verdana.ttf", 8,0 );
 
   if (!font) {
-    printf("Error: Could not load 'pirulen.ttf'\n");
+    //printf("Error: Could not load 'pirulen.ttf'\n");
     return -1;
   }
 
   if(!al_install_audio()) {
-    printf("Error: failed to initialize audio!\n");
+    //printf("Error: failed to initialize audio!\n");
     return -1;
   }
 
   if(!al_init_acodec_addon()) {
-    printf("Error: failed to initialize audio codecs!\n");
+    //printf("Error: failed to initialize audio codecs!\n");
     return -1;
   }
 
   if(!al_reserve_samples(16)) {  // REVISIT: define this as a param?
-    printf("Error: failed to reserve samples!\n");
+    //printf("Error: failed to reserve samples!\n");
     return -1;
   }
 
@@ -120,14 +120,14 @@ int main(int argc, char *argv[]) {
 
   event_queue = al_create_event_queue();
   if(!event_queue) {
-    printf("Error: failted to create event_queue!\n");
+    //printf("Error: failted to create event_queue!\n");
     return -1;
   }
 
   al_register_event_source(event_queue, al_get_keyboard_event_source());
 
   // Game initializations
-  map_level1 = new World("../maps/level1/Map1_prueba.tmx", &sound_handler, false);
+  map_level1 = new World("../maps/level1/Map1_prueba.json", &sound_handler, false);
   camera.InitCamera(0, 0, CAMERA_X, CAMERA_Y, map_level1, bitmap);
   player = new Player("../characters/rick.xml");
   player->RegisterCamera(&camera);
@@ -149,19 +149,19 @@ int main(int argc, char *argv[]) {
     // REVISIT: added mouse to combine creation with main game
     al_get_mouse_state(&mouse_state);
     if (mouse_state.buttons & 1)
-      printf("Mouse coord x = %d, y = %d\n", camera.GetPosX() + mouse_state.x/2, camera.GetPosY() + mouse_state.y/2);
+      //printf("Mouse coord x = %d, y = %d\n", camera.GetPosX() + mouse_state.x/2, camera.GetPosY() + mouse_state.y/2);
 
     if(keyboard.PressedESC())   { return 0; }
 
     // Perform an step of all elements belonging to the world level
-    //printf("[Main] World step\n");
+    ////printf("[Main] World step\n");
     map_level1->WorldStep(player);
 
     // Handle player
-    //printf("[Main] Calling player step\n");
+    ////printf("[Main] Calling player step\n");
     player->CharacterStep(map_level1, keyboard);
 
-    //printf("[Main] Camera positioning and drawing\n");
+    ////printf("[Main] Camera positioning and drawing\n");
     camera.CameraStep(map_level1, player, font);
 
     // Check counter value for adding waiting time

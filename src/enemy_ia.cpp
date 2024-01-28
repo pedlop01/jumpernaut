@@ -188,7 +188,7 @@ void EnemyIA::IAStepWalker(Keyboard &keyboard,
 
   this->SetKeyboardBasedOnDirection(keyboard, direction);
 
-  //printf("[Enemy IA] direction=%d col_right=%d col_left=%d\n", direction, col_right, col_left);
+  ////printf("[Enemy IA] direction=%d col_right=%d col_left=%d\n", direction, col_right, col_left);
   if(!disable_decisions && this->RandomDecision(keyboard, direction, steps_in_x)) {
     wait_for_decision = 0;
   }
@@ -235,7 +235,7 @@ void EnemyIA::IAStepChaser(Keyboard &keyboard,
 
   this->SetKeyboardBasedOnDirection(keyboard, direction);
 
-  //printf("[Enemy IA] direction=%d col_right=%d col_left=%d\n", direction, col_right, col_left);
+  ////printf("[Enemy IA] direction=%d col_right=%d col_left=%d\n", direction, col_right, col_left);
   if((state == CHAR_STATE_RUNNING) && !disable_decisions && this->RandomDecision(keyboard, direction, steps_in_x)) {
     wait_for_decision = 0;
   }
