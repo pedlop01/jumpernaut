@@ -20,7 +20,7 @@ World::World(const char *file, SoundHandler* sound_handler, bool tileExtractedOp
   JsonFileManager manager(file);
   manager.read();
   
-  // Guardar los datos JSON en una variable
+  // Save json data into var
   const json& data = manager.getData();
 
   // Using pointers
