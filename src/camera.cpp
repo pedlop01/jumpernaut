@@ -15,7 +15,7 @@ Camera::Camera() {
   view_width = 0;
   view_height = 0;
   camera_bitmap = 0;
-  screen = 0;
+  display = 0;
   current_camera_view = 0;
   prev_camera_view = 0;
   steps_drawing = 0;
@@ -25,7 +25,7 @@ Camera::~Camera() {
 
 }
 
-void Camera::InitCamera(int _pos_x, int _pos_y, int _pixels_width, int _pixels_height, World* _map, ALLEGRO_BITMAP* _screen) {
+void Camera::InitCamera(int _pos_x, int _pos_y, int _pixels_width, int _pixels_height, World* _map, ALLEGRO_DISPLAY* _display) {
   map = _map;
 
   pixels_width = _pixels_width;
@@ -54,7 +54,7 @@ void Camera::InitCamera(int _pos_x, int _pos_y, int _pixels_width, int _pixels_h
   camera_bitmap = al_create_bitmap(pixels_width, pixels_height);
 
   // Finally, link the screen bitmap
-  screen = _screen;
+  display = _display;
 }
 
 void Camera::PositionBasedOnPlayer(Character* player) {
@@ -476,11 +476,12 @@ void Camera::DrawScreen(World* world, Character* player, ALLEGRO_FONT *font) {
 
   // Draw everything on internal bitmap before resizing it
   // into the screen bitmap  
-  al_set_target_bitmap(camera_bitmap);  
+  al_set_target_bitmap(al_get_backbuffer(display));  
   al_clear_to_color(al_map_rgb(0, 0, 0));   // REVISIT: Drawing background as black. This helps with transparent tiles drawing  
-    
+
   // Traverse map and draw background tiles in the screen
   this->DrawBackTiles(map, player, font);
+#if 0
   // Draw back objects
   this->DrawBackObjects(map, player, font);
   // Draw the player if he is not dying
@@ -503,10 +504,7 @@ void Camera::DrawScreen(World* world, Character* player, ALLEGRO_FONT *font) {
   this->DrawPlayerDying(map, player, font);
   // Draw camera views
   this->DrawCameraViews(map, player, font);
-
-  // Move camera to screen
-  al_set_target_bitmap(screen);
-
+#endif
   al_draw_scaled_bitmap(camera_bitmap,
                         0, 0, pixels_width, pixels_height,
                         0, 0, SCREEN_X, SCREEN_Y, 0);

@@ -39,9 +39,9 @@ class Camera
     int view_width;
     int view_height;
 
-    ALLEGRO_BITMAP* camera_bitmap;
-    ALLEGRO_BITMAP* screen;
-    World*          map;
+    ALLEGRO_BITMAP*  camera_bitmap;
+    ALLEGRO_DISPLAY* display;
+    World*           map;
 
     int prev_camera_view;
     int current_camera_view;
@@ -66,10 +66,10 @@ class Camera
     void SetTilesWidth(int _tiles_width);
     void SetTilesHeight(int _tiles_height);
 
-    ALLEGRO_BITMAP* GetScreen() { return screen; }
-    void SetScreen(ALLEGRO_BITMAP* _screen) { screen = _screen; }
+    ALLEGRO_DISPLAY* GetDisplay() { return display; }
+    void SetDisplay(ALLEGRO_DISPLAY* _display) { display = _display; }
 
-    void InitCamera(int _pos_x, int _pos_y, int _pixels_width, int _pixels_height, World* _map, ALLEGRO_BITMAP* _screen);
+    void InitCamera(int _pos_x, int _pos_y, int _pixels_width, int _pixels_height, World* _map, ALLEGRO_DISPLAY* _display);
     void PositionBasedOnPlayer(Character* player);
 
     void SetMap(World* _map) { map = _map; }
