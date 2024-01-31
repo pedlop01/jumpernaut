@@ -795,7 +795,7 @@ void Object::ObjectStep(World* map, Character* player) {
       animations[state]->AnimStep();
     }
   }
-  std::cout << "fin anim" << state << std::endl;
+  //std::cout << "fin anim" << state << std::endl;
 }
 
 Animation* Object::GetCurrentAnimation() {

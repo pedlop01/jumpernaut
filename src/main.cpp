@@ -157,7 +157,7 @@ int main(int argc, char *argv[]) {
     // Perform an step of all elements belonging to the world level
     ////printf("[Main] World step\n");
     
-    map_level1->WorldStep(player);
+    //map_level1->WorldStep(player);
 
     // Handle player
     player->CharacterStep(map_level1, keyboard);
