@@ -142,11 +142,11 @@ int main(int argc, char *argv[]) {
 
     // Perform an step of all elements belonging to the world level
     //printf("[Main] World step\n");
-    //map_level1->WorldStep(player);
+    map_level1->WorldStep(player);
 
     // Handle player
     //printf("[Main] Calling player step\n");
-    //player->CharacterStep(map_level1, keyboard);
+    player->CharacterStep(map_level1, keyboard);
 
     //printf("[Main] Camera positioning and drawing\n");
     camera.CameraStep(map_level1, player, font);
