@@ -76,8 +76,13 @@ World::World(const char *file, SoundHandler* sound_handler, bool tileExtractedOp
 
   int x = 0;
   int y = 0;
-  
-  for (std::size_t i = 0; i < tiles.size(); ++i) {
+
+  std::cout << tiles.size() << std::endl;
+  std::cout << tiles_front.size() << std::endl;
+  std::cout << tiles_prop.size() << std::endl;
+
+  for (std::size_t i = 0; i < tiles.size(); ++i)
+  {
 
     int tile_attr = tiles[i];
     int tile_front_attr = tiles_front[i];
@@ -101,6 +106,8 @@ World::World(const char *file, SoundHandler* sound_handler, bool tileExtractedOp
     world_tiles_front[x][y]->SetLeftUpY(ceil(tile_front_id/tileset_columns)*tileset_height);
     world_tiles_front[x][y]->SetRightDownX((tile_front_id % tileset_columns) * tileset_width + tileset_width);
     world_tiles_front[x][y]->SetRightDownY(ceil((tile_front_id/tileset_columns))*tileset_height + tileset_height);
+
+
     if (x == (map_width - 1)) {
       y++;
       x = 0;
@@ -108,6 +115,7 @@ World::World(const char *file, SoundHandler* sound_handler, bool tileExtractedOp
       x++;
     }
   }
+
 
   // Read platforms
   this->InitializePlatforms("../levels/level1/platforms.xml");
@@ -130,6 +138,8 @@ World::World(const char *file, SoundHandler* sound_handler, bool tileExtractedOp
   // Read camera views
   this->InitializeCameraViews("../levels/level1/camera_views.xml");
 
+
+  printf("Finish load world map \n");
   shoot_exists = false;
   bomb_exists = false;
 }
@@ -1139,8 +1149,8 @@ void World::WorldStep(Character* player) {
         ((Hazard*)object)->SetTrigger();
     }
 
+
     if (object->GetState() == OBJ_STATE_DEAD) {
-      ////printf("[WorldStep] Object dead %d\n", object->GetId());
       // REVISIT: need to add STATIC OBJECT here? Same for other objects that may persists (LASER)
       switch (object->GetType()) {
         case OBJ_ITEM:
@@ -1158,6 +1168,7 @@ void World::WorldStep(Character* player) {
           //printf("[WARNING] Unknown object type to be deleted in World!\n");
           break;
       }
+      
       it = objects.erase(it);                            // Remove element if it is dead.
       ////printf("[WorldStep] Removed object from object list\n");
     } else if (object->GetActive()) {
@@ -1185,9 +1196,10 @@ void World::WorldStep(Character* player) {
           break;
       }
     } else {
-      //printf("Object inactive %d\n", object->GetId());
+      printf("Object inactive %d\n", object->GetId());
     }
   }
+
 
   // Handle checkpoints
   ////printf("[WorldStep] Handling checkpoints...\n");

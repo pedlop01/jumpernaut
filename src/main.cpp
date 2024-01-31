@@ -66,24 +66,24 @@ int main(int argc, char *argv[]) {
   al_set_new_display_flags(ALLEGRO_WINDOWED);
   display = al_create_display(SCREEN_X, SCREEN_Y);
   if(!display) {
-    //printf("Error: failed to create display!\n");
+    printf("Error: failed to create display!\n");
     return -1;
   }
 
   if(!al_init_image_addon()) {
-    //printf("Error: failed to load image addon!\n");
+    printf("Error: failed to load image addon!\n");
     return -1;
   }
 
   bitmap = al_create_bitmap(SCREEN_X, SCREEN_Y);
   if(!bitmap) {
-    //printf("Error: failed to create bitmap!\n");
+    printf("Error: failed to create bitmap!\n");
     al_destroy_display(display);
     return -1;
   }
 
   if(!al_init_primitives_addon()) {
-    //printf("Error: failed to initialize allegro primitives!\n");
+    printf("Error: failed to initialize allegro primitives!\n");
     return -1;
   }
 
@@ -93,22 +93,22 @@ int main(int argc, char *argv[]) {
   ALLEGRO_FONT *font = al_load_ttf_font("../fonts/verdana.ttf", 8,0 );
 
   if (!font) {
-    //printf("Error: Could not load 'pirulen.ttf'\n");
+    printf("Error: Could not load 'pirulen.ttf'\n");
     return -1;
   }
 
   if(!al_install_audio()) {
-    //printf("Error: failed to initialize audio!\n");
+    printf("Error: failed to initialize audio!\n");
     return -1;
   }
 
   if(!al_init_acodec_addon()) {
-    //printf("Error: failed to initialize audio codecs!\n");
+    printf("Error: failed to initialize audio codecs!\n");
     return -1;
   }
 
   if(!al_reserve_samples(16)) {  // REVISIT: define this as a param?
-    //printf("Error: failed to reserve samples!\n");
+    printf("Error: failed to reserve samples!\n");
     return -1;
   }
 
@@ -120,15 +120,17 @@ int main(int argc, char *argv[]) {
 
   event_queue = al_create_event_queue();
   if(!event_queue) {
-    //printf("Error: failted to create event_queue!\n");
+    printf("Error: failted to create event_queue!\n");
     return -1;
   }
 
   al_register_event_source(event_queue, al_get_keyboard_event_source());
 
   // Game initializations
-  map_level1 = new World("../maps/level1/Map1_prueba.json", &sound_handler, false);
+  map_level1 = new World("../maps/level1/Map_vertical.json", &sound_handler, false);
   camera.InitCamera(0, 0, CAMERA_X, CAMERA_Y, map_level1, bitmap);
+  //camera.InitCamera(0, 0, 0, 100, map_level1, bitmap);
+  
   player = new Player("../characters/rick.xml");
   player->RegisterCamera(&camera);
   player->RegisterSoundHandler(&sound_handler);
@@ -139,7 +141,6 @@ int main(int argc, char *argv[]) {
   // Initialize sounds and start playing music for level 1 (the only implemented at this moment)
   sound_handler.InitializeSounds();
   sound_handler.PlayMusic(0);
-
   // Main loop
   do {
     al_set_target_bitmap(bitmap);
@@ -155,10 +156,10 @@ int main(int argc, char *argv[]) {
 
     // Perform an step of all elements belonging to the world level
     ////printf("[Main] World step\n");
+    
     map_level1->WorldStep(player);
 
     // Handle player
-    ////printf("[Main] Calling player step\n");
     player->CharacterStep(map_level1, keyboard);
 
     ////printf("[Main] Camera positioning and drawing\n");
@@ -166,6 +167,7 @@ int main(int argc, char *argv[]) {
 
     // Check counter value for adding waiting time
     double delay = timer.GetCounter();
+
     if(delay < 20)
 #ifdef __WIN32
       Sleep(20 - delay);
@@ -175,6 +177,7 @@ int main(int argc, char *argv[]) {
 
     // Move bitmap into display
     al_set_target_bitmap(al_get_backbuffer(display));
+    
     al_draw_bitmap(bitmap, 0, 0, 0);    
     al_flip_display();
 

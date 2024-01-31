@@ -778,7 +778,6 @@ void Object::ObjectStep(World* map, Character* player) {
 
 //  //printf("[Object] ComputeCollisions\n");
   this->ComputeCollisions(map, player);
-//  //printf("[Object] ComputeNextState\n");
   this->ComputeNextState(map);
 //  //printf("[Object] ComputeNextPosition\n");
   this->ComputeNextPosition(map);
@@ -788,13 +787,15 @@ void Object::ObjectStep(World* map, Character* player) {
   // This is used in some objects to control how long an animation
   // takes. For instance, an object dying like a laser, should
   // wait until the animation completes to transition to the next state.
-//  //printf("[Object] ComputeAnimationStep\n");
+  //printf("[Object] ComputeAnimationStep\n");
   if (state != OBJ_STATE_DEAD) {
-    if ((prev_direction != direction) && (direction == OBJ_DIR_STOP) && (obj_type != OBJ_BOMB))  // BOMBs are an exception!
+    if ((prev_direction != direction) && (direction == OBJ_DIR_STOP) && (obj_type != OBJ_BOMB)) {  // BOMBs are an exception!
       animations[state]->ResetAnim();
-    else
+    }else  {
       animations[state]->AnimStep();
+    }
   }
+  std::cout << "fin anim" << state << std::endl;
 }
 
 Animation* Object::GetCurrentAnimation() {
