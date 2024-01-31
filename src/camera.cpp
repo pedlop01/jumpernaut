@@ -301,6 +301,7 @@ void Camera::DrawPlayer(World* world, Character* player, ALLEGRO_FONT *font) {
                     player->GetPosY() + player->GetBBY() + player->GetBBHeight() - 1 - GetPosY() + 1,
                     al_map_rgb(0xAF, 0xAF, 0xAF), 1.0);
 #endif
+  al_destroy_bitmap(player_bitmap);
 }
 
 void Camera::DrawPlayerDying(World* world, Character* player, ALLEGRO_FONT *font) {
@@ -319,6 +320,7 @@ void Camera::DrawPlayerDying(World* world, Character* player, ALLEGRO_FONT *font
                         player->GetCurrentAnimationWidth()*player->GetCurrentAnimationScalingFactor(),
                         player->GetCurrentAnimationHeight()*player->GetCurrentAnimationScalingFactor(),
                         player->GetCurrentAnimationBitmapAttributes());
+  al_destroy_bitmap(player_bitmap);
 }
 
 void Camera::DrawPlatforms(World* world, Character* player, ALLEGRO_FONT *font) {
@@ -454,6 +456,7 @@ void Camera::DrawEnemies(World* world, Character* player, ALLEGRO_FONT *font) {
                           al_map_rgb(0xAD, 0x00, 0xF6), 1.0);
       }
 #endif
+      al_destroy_bitmap(enemy_bitmap);
     }
   }
 }
