@@ -276,7 +276,7 @@ void Camera::DrawPlayer(World* world, Character* player, ALLEGRO_FONT *font) {
   if ((player->GetState() == CHAR_STATE_DEAD) || (player->GetState() == CHAR_STATE_DYING))
     return;
 
-  ALLEGRO_BITMAP* player_bitmap = player->GetCurrentAnimationBitmap();
+  ALLEGRO_BITMAP* player_bitmap = player->GetCurrentAnimationBitmap();  // creates a sub-bitmap
   al_draw_bitmap(player_bitmap,
                  player->GetPosX() - GetPosX(),
                  player->GetPosY() - GetPosY(),
@@ -301,6 +301,8 @@ void Camera::DrawPlayer(World* world, Character* player, ALLEGRO_FONT *font) {
                     player->GetPosY() + player->GetBBY() + player->GetBBHeight() - 1 - GetPosY() + 1,
                     al_map_rgb(0xAF, 0xAF, 0xAF), 1.0);
 #endif
+
+  al_destroy_bitmap(player_bitmap);
 }
 
 void Camera::DrawPlayerDying(World* world, Character* player, ALLEGRO_FONT *font) {
@@ -319,6 +321,7 @@ void Camera::DrawPlayerDying(World* world, Character* player, ALLEGRO_FONT *font
                         player->GetCurrentAnimationWidth()*player->GetCurrentAnimationScalingFactor(),
                         player->GetCurrentAnimationHeight()*player->GetCurrentAnimationScalingFactor(),
                         player->GetCurrentAnimationBitmapAttributes());
+  al_destroy_bitmap(player_bitmap);
 }
 
 void Camera::DrawPlatforms(World* world, Character* player, ALLEGRO_FONT *font) {
@@ -454,6 +457,7 @@ void Camera::DrawEnemies(World* world, Character* player, ALLEGRO_FONT *font) {
                           al_map_rgb(0xAD, 0x00, 0xF6), 1.0);
       }
 #endif
+      al_destroy_bitmap(enemy_bitmap);
     }
   }
 }
@@ -481,7 +485,6 @@ void Camera::DrawScreen(World* world, Character* player, ALLEGRO_FONT *font) {
 
   // Traverse map and draw background tiles in the screen
   this->DrawBackTiles(map, player, font);
-#if 0
   // Draw back objects
   this->DrawBackObjects(map, player, font);
   // Draw the player if he is not dying
@@ -504,7 +507,7 @@ void Camera::DrawScreen(World* world, Character* player, ALLEGRO_FONT *font) {
   this->DrawPlayerDying(map, player, font);
   // Draw camera views
   this->DrawCameraViews(map, player, font);
-#endif
+
   al_draw_scaled_bitmap(camera_bitmap,
                         0, 0, pixels_width, pixels_height,
                         0, 0, SCREEN_X, SCREEN_Y, 0);
