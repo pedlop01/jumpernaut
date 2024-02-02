@@ -31,7 +31,7 @@ World::World(const char *file, SoundHandler* sound_handler, bool tileExtractedOp
   map_height = data["height"];
   tileset_width = data["tilewidth"];
   tileset_height = data["tileheight"];
-  std::cout << tileset_width << std::endl;
+  std::cout << map_width << " .... " << map_height << std::endl;
 
   std::string file_name;
   if (data.contains("tilesets") && data["tilesets"].is_array()) {
@@ -118,25 +118,25 @@ World::World(const char *file, SoundHandler* sound_handler, bool tileExtractedOp
 
 
   // Read platforms
-  this->InitializePlatforms("../levels/level1/platforms.xml");
-  // Read items
-  this->InitializeItems("../levels/level1/items.xml", sound_handler);
-  // Read dynamic background objects
-  this->InitializeDynamicBackObjects("../levels/level1/anim_tiles.xml");
-  // Read blocks
-  this->InitializeBlocks("../levels/level1/blocks.xml");
-  // Read hazards
-  this->InitializeHazards("../levels/level1/hazards.xml");
-  // Read checkpoints
-  this->InitializeCheckpoints("../levels/level1/checkpoints.xml");
-  // Read lasers
-  this->InitializeLasers("../levels/level1/lasers.xml");
-  // Read triggers
-  this->InitializeTriggers("../levels/level1/triggers.xml");
-  // Read enemies
-  this->InitializeEnemies("../levels/level1/enemies.xml");
-  // Read camera views
-  this->InitializeCameraViews("../levels/level1/camera_views.xml");
+  //this->InitializePlatforms("../levels/level1/platforms.xml");
+  // // Read items
+  // this->InitializeItems("../levels/level1/items.xml", sound_handler);
+  // // Read dynamic background objects
+  // this->InitializeDynamicBackObjects("../levels/level1/anim_tiles.xml");
+  // // Read blocks
+  // this->InitializeBlocks("../levels/level1/blocks.xml");
+  // // Read hazards
+  // this->InitializeHazards("../levels/level1/hazards.xml");
+  // // Read checkpoints
+  // this->InitializeCheckpoints("../levels/level1/checkpoints.xml");
+  // // Read lasers
+  // this->InitializeLasers("../levels/level1/lasers.xml");
+  // // Read triggers
+  // this->InitializeTriggers("../levels/level1/triggers.xml");
+  // // Read enemies
+  // this->InitializeEnemies("../levels/level1/enemies.xml");
+  // // Read camera views
+  // this->InitializeCameraViews("../levels/level1/camera_views.xml");
 
 
   printf("Finish load world map \n");

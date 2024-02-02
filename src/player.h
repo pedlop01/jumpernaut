@@ -12,7 +12,7 @@ class Player : public Character {
 
   public:    
 	  Player();    // class constructor
-    Player(const char* file);    
+    Player(World* map, const char* file);    
 
     ~Player();   // class desructor
 };

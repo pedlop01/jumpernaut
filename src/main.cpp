@@ -131,7 +131,7 @@ int main(int argc, char *argv[]) {
   camera.InitCamera(0, 0, CAMERA_X, CAMERA_Y, map_level1, bitmap);
   //camera.InitCamera(0, 0, 0, 100, map_level1, bitmap);
   
-  player = new Player("../characters/rick.xml");
+  player = new Player(map_level1, "../characters/rick.xml");
   player->RegisterCamera(&camera);
   player->RegisterSoundHandler(&sound_handler);
 
