@@ -100,7 +100,7 @@ Colbox* Enemy::GetHeightColExt() {
   return &heightColExt;
 }
 
-bool Enemy::CheckCollisionPlayer(World* map, Character* player) {
+void Enemy::CheckCollisionPlayer(World* map, Character* player) {
   int col_x;
   int col_y;
   int col_width;

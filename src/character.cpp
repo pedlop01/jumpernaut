@@ -292,7 +292,7 @@ void Character::SetPosY(World* map, int y, bool all) {
   }
 }
 
-bool Character::ComputeCollisionBlocks(World* map) {
+void Character::ComputeCollisionBlocks(World* map) {
   blockCollisionRight = false;
   blockCollisionLeft = false;
   blockCollisionPtr = 0;

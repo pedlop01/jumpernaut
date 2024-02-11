@@ -39,7 +39,7 @@ class Enemy : public Character {
 
     int GetId() { return id; }
 
-    bool CheckCollisionPlayer(World* map, Character* player);
+    void CheckCollisionPlayer(World* map, Character* player);
 
     void CharacterStep(World* map, Character* player);
 
