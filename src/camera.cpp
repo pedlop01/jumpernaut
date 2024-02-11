@@ -479,8 +479,8 @@ void Camera::DrawCameraViews(World* world, Character* player, ALLEGRO_FONT *font
 void Camera::DrawScreen(World* world, Character* player, ALLEGRO_FONT *font) {
 
   // Draw everything on internal bitmap before resizing it
-  // into the screen bitmap  
-  al_set_target_bitmap(al_get_backbuffer(display));  
+  // into the screen bitmap
+  al_set_target_bitmap(camera_bitmap);
   al_clear_to_color(al_map_rgb(0, 0, 0));   // REVISIT: Drawing background as black. This helps with transparent tiles drawing  
 
   // Traverse map and draw background tiles in the screen
@@ -508,6 +508,7 @@ void Camera::DrawScreen(World* world, Character* player, ALLEGRO_FONT *font) {
   // Draw camera views
   this->DrawCameraViews(map, player, font);
 
+  al_set_target_bitmap(al_get_backbuffer(display));
   al_draw_scaled_bitmap(camera_bitmap,
                         0, 0, pixels_width, pixels_height,
                         0, 0, SCREEN_X, SCREEN_Y, 0);
