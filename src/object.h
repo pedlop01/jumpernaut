@@ -157,7 +157,7 @@ class Object {
 
     Object();
     Object(int _x, int _y, int _width, int _height, int _visible, int _active);
-    ~Object();
+    virtual ~Object();
 
     int GetType()  { return obj_type; }
     int GetState() { return state;    }
