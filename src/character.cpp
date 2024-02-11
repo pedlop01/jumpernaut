@@ -294,7 +294,7 @@ void Character::SetPosY(World* map, int y, bool all) {
   }
 }
 
-bool Character::ComputeCollisionBlocks(World* map) {
+void Character::ComputeCollisionBlocks(World* map) {
   blockCollisionRight = false;
   blockCollisionLeft = false;
   blockCollisionPtr = 0;
@@ -737,9 +737,8 @@ void Character::ComputeNextState(World* map, Keyboard& keyboard) {
 }
 
 void Character::ComputeNextPosition(World* map) {
-  int direction_old;
-  ////printf("PRE: pos_x = %d pos_y %d\n", pos_x, pos_y);
-  ////printf("pos_x = %d, pos_y = %d, speed_x = %f, speed_y = %f\n", pos_x, pos_y, speed_x, speed_y);
+  //printf("PRE: pos_x = %d pos_y %d\n", pos_x, pos_y);
+  //printf("pos_x = %d, pos_y = %d, speed_x = %f, speed_y = %f\n", pos_x, pos_y, speed_x, speed_y);
 
   // First check if on platform
   // REVISIT: platform should be revisited once they will be properly implemented
@@ -754,7 +753,8 @@ void Character::ComputeNextPosition(World* map) {
   }
 
   // If player is collisioning with a block, then
-  // we need to avoid the player to move.  
+  // we need to avoid the player to move.
+  int direction_old = 0; // only used in stop_move_block_col
   if (stop_move_block_col) {
     direction_old = direction;
     direction &= ~CHAR_DIR_RIGHT;

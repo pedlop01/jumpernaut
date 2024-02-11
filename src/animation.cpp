@@ -42,7 +42,7 @@ void Animation::AnimStep() {
 }
 
 bool Animation::CompletedLastAnim() {
-  return ((steps_in_anim == speed) && (current_anim == (sprites.size() - 1)));
+  return ((steps_in_anim == speed) && (current_anim == static_cast<int>(sprites.size() - 1)));
 }
 
 void Animation::ResetAnim() {

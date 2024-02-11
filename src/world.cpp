@@ -186,7 +186,7 @@ void World::InitializePlatforms(const char* file) {
   int plat_recursive;
   int plat_one_use;
   int plat_ini_state;
-  int action_direction;
+  int action_direction = OBJ_DIR_STOP;
   int action_desp;
   int action_wait;
   float action_speed;
@@ -295,7 +295,7 @@ void World::InitializeHazards(const char* file) {
   int   hazard_height;
   bool  hazard_trigger;
   bool  hazard_stop_inactive;
-  int   action_direction;
+  int   action_direction = OBJ_DIR_STOP;
   int   action_desp;
   int   action_wait;
   float action_speed;
@@ -1100,7 +1100,6 @@ Tile* World::GetTileByCoord(int x, int y)
 }
 
 void World::WorldStep(Character* player) {
-
   // Perform an step of all elements belonging to the world level
   ////printf("[WorldStep] Moving platforms...\n");
   for (vector<Platform*>::iterator it = platforms.begin() ; it != platforms.end(); ++it) {

@@ -437,7 +437,6 @@ void Object::ComputeCollisionPlatforms(World* map) {
 
 void Object::ComputeCollisionBlocks(World* map) {
   int col_width  = (using_bb ? bb_width  : width);
-  int col_height = (using_bb ? bb_height : height);
 
   blockColRight = false;
   blockColLeft  = false;
@@ -775,8 +774,7 @@ void Object::ComputeNextSpeed() {
 }
 
 void Object::ObjectStep(World* map, Character* player) {
-
-//  //printf("[Object] ComputeCollisions\n");
+//  printf("[Object] ComputeCollisions\n");
   this->ComputeCollisions(map, player);
   this->ComputeNextState(map);
 //  //printf("[Object] ComputeNextPosition\n");

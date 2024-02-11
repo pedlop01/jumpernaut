@@ -25,7 +25,6 @@ Shoot::~Shoot() {
 void Shoot::UpdateFSMState(World* map) {
   bool inCol;
   bool blockCollision;
-  Animation* current_anim;
 
   inCol = (extColExt.GetLeftUpCol() == TILE_COL)   ||
           (extColExt.GetRightUpCol() == TILE_COL)  ||

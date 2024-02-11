@@ -148,7 +148,7 @@ class Character {
     void GetCollisionsInternalHeightBoxInt(World* map, Colbox &mask_col);
     void GetCollisionsInternalWeightBoxExt(World* map, Colbox &mask_col);    
 
-    bool ComputeCollisionBlocks(World* map);
+    void ComputeCollisionBlocks(World* map);
 
     void ComputeCollisions(World* map);
     void ComputeNextState(World* map, Keyboard& keyboard);

@@ -35,7 +35,7 @@ class Animation
     int GetCurrentAnim() { return current_anim;  }
     int GetStepsInAnim() { return steps_in_anim; }
 
-    bool IsLastAnim()        { return (current_anim == (sprites.size() - 1)); }
+    bool IsLastAnim()        { return (current_anim == static_cast<int>(sprites.size() - 1)); }
     bool CompletedLastAnim();
 };
 
