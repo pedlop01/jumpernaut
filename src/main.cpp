@@ -124,7 +124,7 @@ int main(int argc, char *argv[]) {
 
   // Initialize sounds and start playing music for level 1 (the only implemented at this moment)
   sound_handler.InitializeSounds();
-//  sound_handler.PlayMusic(0);
+  sound_handler.PlayMusic(0);
 
   // Main loop
   bool exit = false;
@@ -151,13 +151,11 @@ int main(int argc, char *argv[]) {
 
     // Check counter value for adding waiting time
     double delay = timer.GetCounter();
-#if 0
     if(delay < 20)
 #ifdef __WIN32
       Sleep(20 - delay);
 #else
       sleep(0.00002 - delay);
-#endif
 #endif
 
     // Move bitmap into display
