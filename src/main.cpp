@@ -142,8 +142,6 @@ int main(int argc, char *argv[]) {
 
   // Main loop
   do {
-    al_set_target_bitmap(bitmap);
-
     keyboard.ReadKeyboard(event_queue);
     
     // REVISIT: added mouse to combine creation with main game
