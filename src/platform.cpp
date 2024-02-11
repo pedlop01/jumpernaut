@@ -104,11 +104,13 @@ void Platform::PlatformStep() {
   bool advance_action = false;
   int  current_speed;
 
+  
   // If no actions, then return
   if (actions.size() == 0) return;
 
   if (state == OBJ_STATE_STOP) {
     // wait for trigger before moving
+
     if (trigger) {
       trigger = false;
       state = OBJ_STATE_MOVING;      

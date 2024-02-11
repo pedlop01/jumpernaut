@@ -24,7 +24,16 @@
 #include "platform.h"
 #include "sound_handler.h"
 
+#include <iostream>
+#include <future>
+#include <chrono>
+#include <thread>
+
 using namespace std;
+
+void funcionAsincrona() {
+  std::cout << "Función ejecutada de manera asíncrona" << std::endl;
+}
 
 int main(int argc, char *argv[]) {
   // Allegro variables
@@ -141,6 +150,14 @@ int main(int argc, char *argv[]) {
   // Initialize sounds and start playing music for level 1 (the only implemented at this moment)
   sound_handler.InitializeSounds();
   sound_handler.PlayMusic(0);
+
+
+
+  using namespace std::chrono;
+  auto start = steady_clock::now();
+  bool actionTriggered = false;
+
+
   // Main loop
   do {
     al_set_target_bitmap(bitmap);
@@ -157,10 +174,19 @@ int main(int argc, char *argv[]) {
     // Perform an step of all elements belonging to the world level
     ////printf("[Main] World step\n");
     
-    //map_level1->WorldStep(player);
+    map_level1->WorldStep(player);
 
     // Handle player
     player->CharacterStep(map_level1, keyboard);
+
+    auto now = steady_clock::now();
+    auto elapsed = duration_cast<seconds>(now - start);
+    // if (elapsed.count() >= 5 && !actionTriggered) {
+    //     player->SetKilled(map_level1);
+    //     actionTriggered = true; // Asegúrate de no llamar a la acción más de una vez
+    //     std::cout << "Acción ejecutada después de 5 segundos." << std::endl;
+    // }
+
 
     ////printf("[Main] Camera positioning and drawing\n");
     camera.CameraStep(map_level1, player, font);

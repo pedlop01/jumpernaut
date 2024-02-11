@@ -174,6 +174,8 @@ void Character::Reset() {
   bb_height = 21;
   bb_height_orig = bb_height;
 
+  std::cout << "ppppppp: " << initial_y <<  std::endl;
+
   killed = false;
 }
 
@@ -694,9 +696,11 @@ void Character::ComputeNextState(World* map, Keyboard& keyboard) {
             state = CHAR_STATE_DEAD;
           }
         }
+
         break;
 
       case CHAR_STATE_DEAD:
+        initial_y = map->GetMapHeight()*map->GetTilesetHeight() - (height + 8); // REVISIT: should be 0
         this->Reset();
         break;
       default:

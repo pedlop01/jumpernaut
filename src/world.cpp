@@ -118,7 +118,7 @@ World::World(const char *file, SoundHandler* sound_handler, bool tileExtractedOp
 
 
   // Read platforms
-  //this->InitializePlatforms("../levels/level1/platforms.xml");
+  this->InitializePlatforms("../levels/level1/platforms.xml");
   // // Read items
   // this->InitializeItems("../levels/level1/items.xml", sound_handler);
   // // Read dynamic background objects
@@ -128,11 +128,11 @@ World::World(const char *file, SoundHandler* sound_handler, bool tileExtractedOp
   // // Read hazards
   // this->InitializeHazards("../levels/level1/hazards.xml");
   // // Read checkpoints
-  // this->InitializeCheckpoints("../levels/level1/checkpoints.xml");
+  this->InitializeCheckpoints("../levels/level1/checkpoints.xml");
   // // Read lasers
   // this->InitializeLasers("../levels/level1/lasers.xml");
-  // // Read triggers
-  // this->InitializeTriggers("../levels/level1/triggers.xml");
+  // Read triggers
+  this->InitializeTriggers("../levels/level1/triggers.xml");
   // // Read enemies
   // this->InitializeEnemies("../levels/level1/enemies.xml");
   // // Read camera views
@@ -201,7 +201,7 @@ void World::InitializePlatforms(const char* file) {
   pugi::xml_parse_result result = plat_file.load_file(file);
 
   if(!result) {
-    //printf("Error: loading world platform data\n");
+    printf("Error: loading world platform data\n");
   }
   
   for (pugi::xml_node plat = plat_file.child("platforms").first_child();
@@ -209,7 +209,7 @@ void World::InitializePlatforms(const char* file) {
        plat = plat.next_sibling()) {
     // First read attributes
     platform_id = plat.attribute("id").as_int();
-    //printf("Platform id = %d\n", platform_id);
+    printf("Platform id = %d\n", platform_id);
 
     pugi::xml_node plat_attrs = plat.child("attributes");
     plat_ini_x = plat_attrs.attribute("ini_x").as_int();
@@ -284,7 +284,7 @@ void World::InitializePlatforms(const char* file) {
 
   }  
 
-  //printf("---------------------------\n");
+  printf("Platforms loaded ---------------------------\n");
 }
 
 void World::InitializeHazards(const char* file) {
@@ -1225,12 +1225,12 @@ void World::WorldStep(Character* player) {
                          player->GetDirection(), player->GetState());
   }
 
-  // Handle enemies
-  ////printf("[WorldStep] Handling enemies...\n");
-  for (vector<Character*>::iterator it = enemies.begin(); it != enemies.end(); it++) {
-    Enemy* enemy = (Enemy*)*it;
-    enemy->CharacterStep(this, player);
-  }
+  // // Handle enemies
+  // ////printf("[WorldStep] Handling enemies...\n");
+  // for (vector<Character*>::iterator it = enemies.begin(); it != enemies.end(); it++) {
+  //   Enemy* enemy = (Enemy*)*it;
+  //   enemy->CharacterStep(this, player);
+  // }
 
   // Check if player has been killed in this step
   // REVISIT: this check can be done at the begginning of this function and avoid
@@ -1242,12 +1242,12 @@ void World::WorldStep(Character* player) {
       Trigger* trigger = *it;
       trigger->Reset();
     }
-    // Traverse some objects to reset them if required
-    for (list<Object*>::iterator it = objects.begin() ; it != objects.end(); ++it) {
-      Object* object = *it;
-      if (object->GetType() == OBJ_LASER)
-        ((Laser*)object)->Reset();
-    }
+    // // Traverse some objects to reset them if required
+    // for (list<Object*>::iterator it = objects.begin() ; it != objects.end(); ++it) {
+    //   Object* object = *it;
+    //   if (object->GetType() == OBJ_LASER)
+    //     ((Laser*)object)->Reset();
+    // }
   }
 
   ////printf("[WorldStep] Completed!\n");  
