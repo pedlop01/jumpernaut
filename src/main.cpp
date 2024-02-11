@@ -30,7 +30,6 @@ int main(int argc, char *argv[]) {
   // Allegro variables
   ALLEGRO_DISPLAY*       display     = NULL;
   ALLEGRO_EVENT_QUEUE*   event_queue = NULL;
-  ALLEGRO_SAMPLE*        sample      = NULL;
   ALLEGRO_MOUSE_STATE    mouse_state;
   World*                 map_level1;
   Player*                player;
