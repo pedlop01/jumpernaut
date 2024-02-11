@@ -104,11 +104,13 @@ void Platform::PlatformStep() {
   bool advance_action = false;
   int  current_speed;
 
+  
   // If no actions, then return
   if (actions.size() == 0) return;
 
   if (state == OBJ_STATE_STOP) {
     // wait for trigger before moving
+
     if (trigger) {
       trigger = false;
       state = OBJ_STATE_MOVING;      
@@ -143,7 +145,7 @@ void Platform::PlatformStep() {
   // Handle current actions
   Action* current_action_ptr = *current_action;
   current_speed = current_action_ptr->GetSpeed();
-  //printf("platform dir=%d, desp=%d, wait=%d cond=%d desp=%d wait_time=%d\n",
+  ////printf("platform dir=%d, desp=%d, wait=%d cond=%d desp=%d wait_time=%d\n",
   //  current_action_ptr->GetDirection(),
   //  current_action_ptr->GetDesp(),
   //  current_action_ptr->GetWait(),

@@ -62,11 +62,11 @@ void Block::UpdateFSMState(World* map) {
 void Block::ComputeCollisions(World* map, Character* player) {
   // No collisions for blocks here
   // REVISIT: should we implement collisions with player and other world objects here?
-  //printf("[Block] ComputeCollisions\n");
+  ////printf("[Block] ComputeCollisions\n");
 }
 
 void Block::ComputeNextPosition(World* map) {
-  //printf("[BLOCK] ComputeNextPosition x = %d, y = %d\n", GetX(), GetY());
+  ////printf("[BLOCK] ComputeNextPosition x = %d, y = %d\n", GetX(), GetY());
 
   switch(state) {
     case OBJ_STATE_STOP:

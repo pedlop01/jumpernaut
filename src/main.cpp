@@ -24,7 +24,16 @@
 #include "platform.h"
 #include "sound_handler.h"
 
+#include <iostream>
+#include <future>
+#include <chrono>
+#include <thread>
+
 using namespace std;
+
+void funcionAsincrona() {
+  std::cout << "Función ejecutada de manera asíncrona" << std::endl;
+}
 
 int main(int argc, char *argv[]) {
   // Allegro variables
@@ -41,23 +50,23 @@ int main(int argc, char *argv[]) {
 
   // Check arguments
   if(argc != 1) {
-    printf("Error: wrong parameters. Usage: XXXX\n");
+    //printf("Error: wrong parameters. Usage: XXXX\n");
     exit(-1);
   }
 
   // allegro initializations
   if(!al_init()) {
-    printf("Error: failed to initialize allegro!\n");
+    //printf("Error: failed to initialize allegro!\n");
     return -1;
   }
 
   if(!al_install_keyboard()) {
-    printf("Error: failed to initialize keyboard!\n");
+    //printf("Error: failed to initialize keyboard!\n");
     return -1;
   }
 
   if(!al_install_mouse()) {
-    printf("Error: failed to initialize keyboard!\n");
+    //printf("Error: failed to initialize keyboard!\n");
     return -1;
   }
 
@@ -112,9 +121,13 @@ int main(int argc, char *argv[]) {
   al_register_event_source(event_queue, al_get_keyboard_event_source());
 
   // Game initializations
+  map_level1 = new World("../maps/level1/Map_vertical.json", &sound_handler, false);
+  //camera.InitCamera(0, 0, 0, 100, map_level1, bitmap);
+  
+  player = new Player(map_level1, "../characters/rick.xml");
   map_level1 = new World("../maps/level1/Map1_prueba.tmx", &sound_handler, false);
   camera.InitCamera(0, 0, CAMERA_X, CAMERA_Y, map_level1, display);
-  player = new Player("../characters/rick.xml");
+  //player = new Player("../characters/rick.xml");
   player->RegisterCamera(&camera);
   player->RegisterSoundHandler(&sound_handler);
 
@@ -125,6 +138,13 @@ int main(int argc, char *argv[]) {
   sound_handler.InitializeSounds();
   sound_handler.PlayMusic(0);
 
+
+
+  using namespace std::chrono;
+  auto start = steady_clock::now();
+  bool actionTriggered = false;
+
+
   // Main loop
   bool exit = false;
   do {
@@ -133,23 +153,33 @@ int main(int argc, char *argv[]) {
     // REVISIT: added mouse to combine creation with main game
     al_get_mouse_state(&mouse_state);
     if (mouse_state.buttons & 1)
-      printf("Mouse coord x = %d, y = %d\n", camera.GetPosX() + mouse_state.x/2, camera.GetPosY() + mouse_state.y/2);
+      //printf("Mouse coord x = %d, y = %d\n", camera.GetPosX() + mouse_state.x/2, camera.GetPosY() + mouse_state.y/2);
 
     if(keyboard.PressedESC())   { exit = true; }
 
     // Perform an step of all elements belonging to the world level
-    //printf("[Main] World step\n");
+    ////printf("[Main] World step\n");
+    
     map_level1->WorldStep(player);
 
     // Handle player
-    //printf("[Main] Calling player step\n");
     player->CharacterStep(map_level1, keyboard);
 
-    //printf("[Main] Camera positioning and drawing\n");
+    auto now = steady_clock::now();
+    auto elapsed = duration_cast<seconds>(now - start);
+    // if (elapsed.count() >= 5 && !actionTriggered) {
+    //     player->SetKilled(map_level1);
+    //     actionTriggered = true; // Asegúrate de no llamar a la acción más de una vez
+    //     std::cout << "Acción ejecutada después de 5 segundos." << std::endl;
+    // }
+
+
+    ////printf("[Main] Camera positioning and drawing\n");
     camera.CameraStep(map_level1, player, font);
 
     // Check counter value for adding waiting time
     double delay = timer.GetCounter();
+
     if(delay < 20)
 #ifdef __WIN32
       Sleep(20 - delay);

@@ -485,20 +485,20 @@ void Camera::DrawScreen(World* world, Character* player, ALLEGRO_FONT *font) {
 
   // Traverse map and draw background tiles in the screen
   this->DrawBackTiles(map, player, font);
-  // Draw back objects
-  this->DrawBackObjects(map, player, font);
-  // Draw the player if he is not dying
+  // // Draw back objects
+  // this->DrawBackObjects(map, player, font);
+  // // Draw the player if he is not dying
   this->DrawPlayer(map, player, font);
-  // Draw the enemies
-  this->DrawEnemies(map, player, font);
-  // Draw resting objects
-  this->DrawFrontObjects(map, player, font);
-  // Draw platforms
+  // // Draw the enemies
+  // this->DrawEnemies(map, player, font);
+  // // Draw resting objects
+  // this->DrawFrontObjects(map, player, font);
+  // // Draw platforms
   this->DrawPlatforms(map, player, font);
   // Traverse map and draw front tiles in the screen
   this->DrawFrontTiles(map, player, font);
   // Draw blocks
-  this->DrawBlocks(map, player, font);
+  //this->DrawBlocks(map, player, font);
   // Draw checkpoints (only for debug)
   this->DrawCheckpoints(map, player, font);
   // Draw triggers (only for debug)
@@ -546,11 +546,11 @@ bool Camera::CoordsWithinCamera(int x, int y) {
 
 void Camera::CameraStep(World* world, Character *player, ALLEGRO_FONT *font) {
   // Check in which camera view the player is
-  //printf("[CameraStep] Calling to set camera view\n");
+  ////printf("[CameraStep] Calling to set camera view\n");
   CameraView* camera_view = world->GetCurrentCameraView(player);
   this->SetCameraView(camera_view);
 
   this->PositionBasedOnPlayer(player);
-  //printf("[CameraStep] Camera draw screen\n");
+  ////printf("[CameraStep] Camera draw screen\n");
   this->DrawScreen(world, player, font);
 }

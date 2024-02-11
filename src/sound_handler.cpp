@@ -11,7 +11,7 @@ SoundHandler::~SoundHandler() {
 void SoundHandler::InitializeSounds() {
   music[0] = al_load_sample("../music/level1.ogg");
   //if(!music[0]) {
-  //  printf("Error: failed loading music!\n");
+  //  //printf("Error: failed loading music!\n");
   //  exit(-1);
   //}
   music_instance[0] = al_create_sample_instance(music[0]);

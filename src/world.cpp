@@ -3,6 +3,8 @@
 #include "world.h" // class's header file
 #include "trigger.h"
 #include "enemy.h"
+#include "utils/json_file.h"
+#include "utils/file_loader.h"
 
 // class constructor
 World::World()
@@ -11,30 +13,40 @@ World::World()
 
 World::World(const char *file, SoundHandler* sound_handler, bool tileExtractedOption)
 {
-  // REVISIT: need to read collision map
+
   char aux_file[100];
   char tileset_file[100];
 
-  pugi::xml_parse_result result = world_file.load_file(file);
+  JsonFileManager manager(file);
+  manager.read();
+  
+  // Save json data into var
+  const json& data = manager.getData();
 
-  if(!result) {
-      printf("Error: loading world data\n");      
-  }  
+  // Using pointers
+  //auto resultPtr = manager.findPtr(data["layers"], "name", "FrontTiles");
+  
 
-  pugi::xml_node map = world_file.child("map");
+  map_width = data["width"];
+  map_height = data["height"];
+  tileset_width = data["tilewidth"];
+  tileset_height = data["tileheight"];
+  std::cout << map_width << " .... " << map_height << std::endl;
 
-  map_width = map.attribute("width").as_int();
-  map_height = map.attribute("height").as_int();
-  tileset_width = map.attribute("tilewidth").as_int();
-  tileset_height = map.attribute("tileheight").as_int();
+  std::string file_name;
+  if (data.contains("tilesets") && data["tilesets"].is_array()) {
+    const json &tileset = data["tilesets"][0];
+    file_name = tileset["name"].get<std::string>();
+    tileset_count = tileset["tilecount"];
+    tileset_columns = tileset["columns"];
+    tileset_tile_width = tileset["tilewidth"];
+    tileset_tile_height = tileset["tileheight"];
+  }
 
-  pugi::xml_node tileset = world_file.child("map").child("tileset");
 
   sprintf(aux_file, "%s", file);
-  sprintf(tileset_file, "%s/%s", chopToDirectory(aux_file).c_str(), tileset.attribute("name").as_string());
-
-  printf("Tileset file = %s\n", tileset_file);
-
+  sprintf(tileset_file, "%s/%s", chopToDirectory(aux_file).c_str(), file_name.c_str());
+ 
   world_image = al_load_bitmap(tileset_file);
   if (!world_image) {
     printf("Error: failed to load tileset\n");    
@@ -43,13 +55,7 @@ World::World(const char *file, SoundHandler* sound_handler, bool tileExtractedOp
   // Set transparent color for tileset
   al_convert_mask_to_alpha(world_image, al_map_rgb(255,0,255));
 
-  tileset_count = tileset.attribute("tilecount").as_int();
-  tileset_columns = tileset.attribute("columns").as_int();
-  tileset_tile_width = tileset.attribute("tilewidth").as_int();
-  tileset_tile_height = tileset.attribute("tileheight").as_int();
 
-  printf("Tileset count = %d\nTileset columns = %d\nTile width = %d\nTile height = %d\n", tileset_count, tileset_columns, tileset_tile_width, tileset_tile_height);
-  
   // Initialize world    
   world_tiles = new Tile**[map_width];
   world_tiles_front = new Tile**[map_width];
@@ -64,24 +70,28 @@ World::World(const char *file, SoundHandler* sound_handler, bool tileExtractedOp
   }
 
   // First initialize tiles
-  // Tile properties is a layer of same size as tiles, so we can reuse the for stament
-  // for both of them. REVISIT: add check to verify they have same size?
-  pugi::xml_node xml_tile       = world_file.child("map").find_child_by_attribute("layer", "name", "Tiles").child("data");
-  pugi::xml_node xml_tile_front = world_file.child("map").find_child_by_attribute("layer", "name", "FrontTiles").child("data");
-  pugi::xml_node xml_tile_prop  = world_file.child("map").find_child_by_attribute("layer", "name", "Collisions").child("data");
+  nlohmann::json tiles        = manager.find(data["layers"], "name", "Tiles")["data"];
+  nlohmann::json tiles_front  = manager.find(data["layers"], "name", "FrontTiles")["data"];
+  nlohmann::json tiles_prop   = manager.find(data["layers"], "name", "Collisions")["data"];
 
   int x = 0;
   int y = 0;
-  pugi::xml_node prop       = xml_tile_prop.first_child();
-  pugi::xml_node tile_front = xml_tile_front.first_child();
-  for (pugi::xml_node tile = xml_tile.first_child(); tile; tile = tile.next_sibling()) {
-    pugi::xml_attribute tile_attr       = tile.first_attribute();
-    pugi::xml_attribute tile_front_attr = tile_front.first_attribute();
-    pugi::xml_attribute prop_attr       = prop.first_attribute();
 
-    int tile_id       = ((tile_attr.as_int() != 0) ? tile_attr.as_int() - 1: tile_attr.as_int());
-    int tile_front_id = ((tile_front_attr.as_int() != 0) ? tile_front_attr.as_int() - 1: tile_front_attr.as_int());
-    int tile_prop     = ((prop_attr.as_int() != 0) ? prop_attr.as_int() - 1: prop_attr.as_int());
+  std::cout << tiles.size() << std::endl;
+  std::cout << tiles_front.size() << std::endl;
+  std::cout << tiles_prop.size() << std::endl;
+
+  for (std::size_t i = 0; i < tiles.size(); ++i)
+  {
+
+    int tile_attr = tiles[i];
+    int tile_front_attr = tiles_front[i];
+    int prop_attr = tiles_prop[i];
+
+    int tile_id       = ((tile_attr != 0) ? tile_attr - 1: tile_attr);
+    int tile_front_id = ((tile_front_attr != 0) ? tile_front_attr - 1: tile_front_attr);
+    int tile_prop     = ((prop_attr != 0) ? prop_attr - 1: prop_attr);
+    
     // Save the id of the tile aswell as the coordinates in the tileset bitmap
     world_tiles[x][y]->SetValue(tile_id);
     world_tiles[x][y]->SetType(tile_prop);
@@ -96,38 +106,40 @@ World::World(const char *file, SoundHandler* sound_handler, bool tileExtractedOp
     world_tiles_front[x][y]->SetLeftUpY(ceil(tile_front_id/tileset_columns)*tileset_height);
     world_tiles_front[x][y]->SetRightDownX((tile_front_id % tileset_columns) * tileset_width + tileset_width);
     world_tiles_front[x][y]->SetRightDownY(ceil((tile_front_id/tileset_columns))*tileset_height + tileset_height);
+
+
     if (x == (map_width - 1)) {
       y++;
       x = 0;
     } else {
       x++;
     }
-    // Move prop and front pointer
-    prop       = prop.next_sibling();
-    tile_front = tile_front.next_sibling();
   }
+
 
   // Read platforms
   this->InitializePlatforms("../levels/level1/platforms.xml");
-  // Read items
-  this->InitializeItems("../levels/level1/items.xml", sound_handler);
-  // Read dynamic background objects
-  this->InitializeDynamicBackObjects("../levels/level1/anim_tiles.xml");
-  // Read blocks
-  this->InitializeBlocks("../levels/level1/blocks.xml");
-  // Read hazards
-  this->InitializeHazards("../levels/level1/hazards.xml");
-  // Read checkpoints
+  // // Read items
+  // this->InitializeItems("../levels/level1/items.xml", sound_handler);
+  // // Read dynamic background objects
+  // this->InitializeDynamicBackObjects("../levels/level1/anim_tiles.xml");
+  // // Read blocks
+  // this->InitializeBlocks("../levels/level1/blocks.xml");
+  // // Read hazards
+  // this->InitializeHazards("../levels/level1/hazards.xml");
+  // // Read checkpoints
   this->InitializeCheckpoints("../levels/level1/checkpoints.xml");
-  // Read lasers
-  this->InitializeLasers("../levels/level1/lasers.xml");
+  // // Read lasers
+  // this->InitializeLasers("../levels/level1/lasers.xml");
   // Read triggers
   this->InitializeTriggers("../levels/level1/triggers.xml");
-  // Read enemies
-  this->InitializeEnemies("../levels/level1/enemies.xml");
-  // Read camera views
-  this->InitializeCameraViews("../levels/level1/camera_views.xml");
+  // // Read enemies
+  // this->InitializeEnemies("../levels/level1/enemies.xml");
+  // // Read camera views
+  // this->InitializeCameraViews("../levels/level1/camera_views.xml");
 
+
+  printf("Finish load world map \n");
   shoot_exists = false;
   bomb_exists = false;
 }
@@ -182,9 +194,9 @@ void World::InitializePlatforms(const char* file) {
   int num_actions;
   pugi::xml_document plat_file;
 
-  printf("---------------------------\n");
-  printf("| Initializing platforms  |\n");
-  printf("---------------------------\n");
+  //printf("---------------------------\n");
+  //printf("| Initializing platforms  |\n");
+  //printf("---------------------------\n");
 
   pugi::xml_parse_result result = plat_file.load_file(file);
 
@@ -210,15 +222,15 @@ void World::InitializePlatforms(const char* file) {
     plat_ini_state = strcmp(plat_attrs.attribute("ini_state").as_string(), "stop") == 0 ?
                        OBJ_STATE_STOP :
                        OBJ_STATE_MOVING;
-    printf(" - File = %s\n", plat_attrs.attribute("file").as_string());
-    printf(" - ini_x = %d\n", plat_ini_x);
-    printf(" - ini_y = %d\n", plat_ini_y);
-    printf(" - width = %d\n", plat_width);
-    printf(" - height = %d\n", plat_height);
-    printf(" - visible = %d\n", plat_visible);
-    printf(" - recursive = %d\n", plat_recursive);
-    printf(" - one_use = %d\n", plat_one_use);
-    printf(" - ini_state = %s\n", plat_attrs.attribute("ini_state").as_string());
+    //printf(" - File = %s\n", plat_attrs.attribute("file").as_string());
+    //printf(" - ini_x = %d\n", plat_ini_x);
+    //printf(" - ini_y = %d\n", plat_ini_y);
+    //printf(" - width = %d\n", plat_width);
+    //printf(" - height = %d\n", plat_height);
+    //printf(" - visible = %d\n", plat_visible);
+    //printf(" - recursive = %d\n", plat_recursive);
+    //printf(" - one_use = %d\n", plat_one_use);
+    //printf(" - ini_state = %s\n", plat_attrs.attribute("ini_state").as_string());
 
     // Create platform
     Platform* world_platform = new Platform(plat_attrs.attribute("file").as_string(),
@@ -232,14 +244,14 @@ void World::InitializePlatforms(const char* file) {
                                             plat_recursive,
                                             plat_one_use);
 
-    printf(" - actions:\n");
+    //printf(" - actions:\n");
     num_actions = 0;
     // Second, get actions
     pugi::xml_node actions = plat.child("actions");
     for (pugi::xml_node action = actions.first_child();
          action;
          action = action.next_sibling()) {
-      printf("\t - action %d:\n", num_actions);
+      //printf("\t - action %d:\n", num_actions);
       if (strcmp(action.attribute("direction").as_string(), "stop") == 0) {
         action_direction = OBJ_DIR_STOP;
       } else if (strcmp(action.attribute("direction").as_string(), "right") == 0) {
@@ -255,11 +267,11 @@ void World::InitializePlatforms(const char* file) {
       action_wait = action.attribute("wait").as_int();
       action_speed = action.attribute("speed").as_float();      
       action_cond = action.attribute("cond").as_int();
-      printf("\t\t - direction=%s\n", action.attribute("direction").as_string());
-      printf("\t\t - desp=%d\n", action_desp);
-      printf("\t\t - wait=%d\n", action_wait);
-      printf("\t\t - speed=%f\n", action_speed);
-      printf("\t\t - cond=%d\n", action_cond);
+      //printf("\t\t - direction=%s\n", action.attribute("direction").as_string());
+      //printf("\t\t - desp=%d\n", action_desp);
+      //printf("\t\t - wait=%d\n", action_wait);
+      //printf("\t\t - speed=%f\n", action_speed);
+      //printf("\t\t - cond=%d\n", action_cond);
 
       world_platform->AddAction(action_direction,
                                 action_desp,
@@ -272,7 +284,7 @@ void World::InitializePlatforms(const char* file) {
 
   }  
 
-  printf("---------------------------\n");
+  printf("Platforms loaded ---------------------------\n");
 }
 
 void World::InitializeHazards(const char* file) {
@@ -292,14 +304,14 @@ void World::InitializeHazards(const char* file) {
   int   num_actions;  
   pugi::xml_document hazard_file;
 
-  printf("---------------------------\n");
-  printf("| Initializing hazards    |\n");
-  printf("---------------------------\n");
+  //printf("---------------------------\n");
+  //printf("| Initializing hazards    |\n");
+  //printf("---------------------------\n");
 
   pugi::xml_parse_result result = hazard_file.load_file(file);
 
   if(!result) {
-    printf("Error: loading world hazard data\n");
+    //printf("Error: loading world hazard data\n");
   }
   
   for (pugi::xml_node hazard = hazard_file.child("hazards").first_child();
@@ -307,7 +319,7 @@ void World::InitializeHazards(const char* file) {
        hazard = hazard.next_sibling()) {
     // First read attributes
     hazard_id = hazard.attribute("id").as_int();
-    printf("Hazard id = %d\n", hazard_id);
+    //printf("Hazard id = %d\n", hazard_id);
 
     pugi::xml_node hazard_attrs = hazard.child("attributes");
     hazard_ini_x                = hazard_attrs.attribute("ini_x").as_int();
@@ -318,13 +330,13 @@ void World::InitializeHazards(const char* file) {
     hazard_stop_inactive        = hazard_attrs.attribute("stop_inactive").as_bool();
 
 
-    printf(" - File = %s\n",          hazard_attrs.attribute("file").as_string());
-    printf(" - ini_x = %d\n",         hazard_ini_x);
-    printf(" - ini_y = %d\n",         hazard_ini_y);
-    printf(" - width = %d\n",         hazard_width);
-    printf(" - height = %d\n",        hazard_height);
-    printf(" - trigger = %d\n",       hazard_trigger);
-    printf(" - stop_inactive = %d\n", hazard_stop_inactive);
+    //printf(" - File = %s\n",          hazard_attrs.attribute("file").as_string());
+    //printf(" - ini_x = %d\n",         hazard_ini_x);
+    //printf(" - ini_y = %d\n",         hazard_ini_y);
+    //printf(" - width = %d\n",         hazard_width);
+    //printf(" - height = %d\n",        hazard_height);
+    //printf(" - trigger = %d\n",       hazard_trigger);
+    //printf(" - stop_inactive = %d\n", hazard_stop_inactive);
 
     // Create hazard
     Hazard* world_hazard = new Hazard(hazard_attrs.attribute("file").as_string(),
@@ -336,14 +348,14 @@ void World::InitializeHazards(const char* file) {
                                       hazard_trigger,
                                       hazard_stop_inactive);
 
-    printf(" - actions:\n");
+    //printf(" - actions:\n");
     num_actions = 0;
     // Second, get actions
     pugi::xml_node actions = hazard.child("actions");
     for (pugi::xml_node action = actions.first_child();
          action;
          action = action.next_sibling()) {
-      printf("\t - action %d:\n", num_actions);
+      //printf("\t - action %d:\n", num_actions);
       action_deactivate = false;
       if (strcmp(action.attribute("direction").as_string(), "stop") == 0) {
         action_direction = OBJ_DIR_STOP;
@@ -363,12 +375,12 @@ void World::InitializeHazards(const char* file) {
       action_wait = action.attribute("wait").as_int();
       action_speed = action.attribute("speed").as_float();
       action_cond = action.attribute("cond").as_int();
-      printf("\t\t - direction=%s\n", action.attribute("direction").as_string());
-      printf("\t\t - deactivate=%d\n", (int)action_deactivate);
-      printf("\t\t - desp=%d\n", action_desp);
-      printf("\t\t - wait=%d\n", action_wait);
-      printf("\t\t - speed=%f\n", action_speed);
-      printf("\t\t - wait=%d\n", action_cond);
+      //printf("\t\t - direction=%s\n", action.attribute("direction").as_string());
+      //printf("\t\t - deactivate=%d\n", (int)action_deactivate);
+      //printf("\t\t - desp=%d\n", action_desp);
+      //printf("\t\t - wait=%d\n", action_wait);
+      //printf("\t\t - speed=%f\n", action_speed);
+      //printf("\t\t - wait=%d\n", action_cond);
 
       world_hazard->AddAction(action_direction,
                               action_desp,
@@ -382,7 +394,7 @@ void World::InitializeHazards(const char* file) {
 
   }  
 
-  printf("---------------------------\n");
+  //printf("---------------------------\n");
 }
 
 void World::InitializeItems(const char* file, SoundHandler* sound_handler) {
@@ -393,14 +405,14 @@ void World::InitializeItems(const char* file, SoundHandler* sound_handler) {
   int item_height;  
   pugi::xml_document item_file;
 
-  printf("---------------------------\n");
-  printf("| Initializing items      |\n");
-  printf("---------------------------\n");
+  //printf("---------------------------\n");
+  //printf("| Initializing items      |\n");
+  //printf("---------------------------\n");
 
   pugi::xml_parse_result result = item_file.load_file(file);
 
   if(!result) {
-    printf("Error: loading world items data\n");
+    //printf("Error: loading world items data\n");
   }
  
   for (pugi::xml_node item = item_file.child("items").first_child();
@@ -408,7 +420,7 @@ void World::InitializeItems(const char* file, SoundHandler* sound_handler) {
        item = item.next_sibling()) {
     // First read attributes
     item_id = item.attribute("id").as_int();
-    printf("Item id = %d\n", item_id);
+    //printf("Item id = %d\n", item_id);
 
     pugi::xml_node item_attrs = item.child("attributes");
     item_ini_x  = item_attrs.attribute("ini_x").as_int();
@@ -416,11 +428,11 @@ void World::InitializeItems(const char* file, SoundHandler* sound_handler) {
     item_width  = item_attrs.attribute("width").as_int();
     item_height = item_attrs.attribute("height").as_int();
 
-    printf(" - File = %s\n", item_attrs.attribute("file").as_string());
-    printf(" - ini_x = %d\n", item_ini_x);
-    printf(" - ini_y = %d\n", item_ini_y);
-    printf(" - width = %d\n", item_width);
-    printf(" - height = %d\n", item_height);
+    //printf(" - File = %s\n", item_attrs.attribute("file").as_string());
+    //printf(" - ini_x = %d\n", item_ini_x);
+    //printf(" - ini_y = %d\n", item_ini_y);
+    //printf(" - width = %d\n", item_width);
+    //printf(" - height = %d\n", item_height);
 
     // Create item
     Item* world_item = new Item(item_id);
@@ -436,7 +448,7 @@ void World::InitializeItems(const char* file, SoundHandler* sound_handler) {
     objects.push_back(world_item);
   }  
 
-  printf("---------------------------\n");
+  //printf("---------------------------\n");
 }
 
 void World::InitializeDynamicBackObjects(const char* file) {
@@ -448,14 +460,14 @@ void World::InitializeDynamicBackObjects(const char* file) {
   int dyn_obj_skip_num_anims;
   pugi::xml_document dyn_obj_file;
 
-  printf("------------------------------------------\n");
-  printf("| Initializing dynamic backgound objects |\n");
-  printf("------------------------------------------\n");
+  //printf("------------------------------------------\n");
+  //printf("| Initializing dynamic backgound objects |\n");
+  //printf("------------------------------------------\n");
 
   pugi::xml_parse_result result = dyn_obj_file.load_file(file);
 
   if(!result) {
-    printf("Error: loading world dynamic background objects data\n");
+    //printf("Error: loading world dynamic background objects data\n");
   }
  
   for (pugi::xml_node dyn_obj = dyn_obj_file.child("anim_objects").first_child();
@@ -463,7 +475,7 @@ void World::InitializeDynamicBackObjects(const char* file) {
        dyn_obj = dyn_obj.next_sibling()) {
     // First read attributes
     dyn_obj_id = dyn_obj.attribute("id").as_int();
-    printf("Dynamic object id = %d\n", dyn_obj_id);
+    //printf("Dynamic object id = %d\n", dyn_obj_id);
 
     pugi::xml_node dyn_obj_attrs = dyn_obj.child("attributes");
     dyn_obj_ini_x                = dyn_obj_attrs.attribute("ini_x").as_int();
@@ -472,12 +484,12 @@ void World::InitializeDynamicBackObjects(const char* file) {
     dyn_obj_height               = dyn_obj_attrs.attribute("height").as_int();
     dyn_obj_skip_num_anims       = dyn_obj_attrs.attribute("skip_num_anims").as_int();
 
-    printf(" - File = %s\n", dyn_obj_attrs.attribute("file").as_string());
-    printf(" - ini_x = %d\n", dyn_obj_ini_x);
-    printf(" - ini_y = %d\n", dyn_obj_ini_y);
-    printf(" - width = %d\n", dyn_obj_width);
-    printf(" - height = %d\n", dyn_obj_height);
-    printf(" - skip_anims = %d\n", dyn_obj_skip_num_anims);
+    //printf(" - File = %s\n", dyn_obj_attrs.attribute("file").as_string());
+    //printf(" - ini_x = %d\n", dyn_obj_ini_x);
+    //printf(" - ini_y = %d\n", dyn_obj_ini_y);
+    //printf(" - width = %d\n", dyn_obj_width);
+    //printf(" - height = %d\n", dyn_obj_height);
+    //printf(" - skip_anims = %d\n", dyn_obj_skip_num_anims);
 
     // Create dyn_obj
     StaticObject* world_dyn_obj = new StaticObject(dyn_obj_id);
@@ -489,7 +501,7 @@ void World::InitializeDynamicBackObjects(const char* file) {
     back_objects.push_back(world_dyn_obj);
   }  
 
-  printf("---------------------------\n");
+  //printf("---------------------------\n");
 }
 
 void World::InitializeBlocks(const char* file) {
@@ -501,14 +513,14 @@ void World::InitializeBlocks(const char* file) {
   bool block_exploits;
   pugi::xml_document block_file;
 
-  printf("------------------------------\n");
-  printf("| Initializing block objects |\n");
-  printf("-----------------------------\n");
+  //printf("------------------------------\n");
+  //printf("| Initializing block objects |\n");
+  //printf("-----------------------------\n");
 
   pugi::xml_parse_result result = block_file.load_file(file);
 
   if(!result) {
-    printf("Error: loading world block objects data\n");
+    //printf("Error: loading world block objects data\n");
   }
  
   for (pugi::xml_node block = block_file.child("blocks").first_child();
@@ -516,7 +528,7 @@ void World::InitializeBlocks(const char* file) {
        block = block.next_sibling()) {
     // First read attributes
     block_id = block.attribute("id").as_int();
-    printf("Block object id = %d\n", block_id);
+    //printf("Block object id = %d\n", block_id);
 
     pugi::xml_node block_attrs = block.child("attributes");
     block_ini_x                = block_attrs.attribute("ini_x").as_int();
@@ -525,12 +537,12 @@ void World::InitializeBlocks(const char* file) {
     block_height               = block_attrs.attribute("height").as_int();
     block_exploits             = block_attrs.attribute("exploits").as_bool();
 
-    printf(" - File = %s\n", block_attrs.attribute("file").as_string());
-    printf(" - ini_x = %d\n", block_ini_x);
-    printf(" - ini_y = %d\n", block_ini_y);
-    printf(" - width = %d\n", block_width);
-    printf(" - height = %d\n", block_height);
-    printf(" - exploits = %d\n", (int)block_exploits);
+    //printf(" - File = %s\n", block_attrs.attribute("file").as_string());
+    //printf(" - ini_x = %d\n", block_ini_x);
+    //printf(" - ini_y = %d\n", block_ini_y);
+    //printf(" - width = %d\n", block_width);
+    //printf(" - height = %d\n", block_height);
+    //printf(" - exploits = %d\n", (int)block_exploits);
 
     // Create block
     Block* world_block = new Block(block_id);
@@ -542,7 +554,7 @@ void World::InitializeBlocks(const char* file) {
     blocks.push_back(world_block);
   }  
 
-  printf("---------------------------\n");
+  //printf("---------------------------\n");
 }
 
 void World::InitializeCheckpoints(const char* file) {
@@ -557,14 +569,14 @@ void World::InitializeCheckpoints(const char* file) {
   pugi::xml_document chk_file;
   vector<vector<int> > nxt_chks;
 
-  printf("------------------------------------\n");
-  printf("| Initializing checkpoints objects |\n");
-  printf("------------------------------------\n");
+  //printf("------------------------------------\n");
+  //printf("| Initializing checkpoints objects |\n");
+  //printf("------------------------------------\n");
 
   pugi::xml_parse_result result = chk_file.load_file(file);
 
   if(!result) {
-    printf("Error: loading world checkpoints data\n");
+    //printf("Error: loading world checkpoints data\n");
   }
  
   for (pugi::xml_node chk = chk_file.child("checkpoints").first_child();
@@ -572,7 +584,7 @@ void World::InitializeCheckpoints(const char* file) {
        chk = chk.next_sibling()) {
     // First read attributes
     chk_id = chk.attribute("id").as_int();
-    printf("Checkpoint id = %d\n", chk_id);
+    //printf("Checkpoint id = %d\n", chk_id);
     
     chk_x      = chk.attribute("chk_x").as_int();
     chk_y      = chk.attribute("chk_y").as_int();
@@ -585,7 +597,7 @@ void World::InitializeCheckpoints(const char* file) {
     } else if (strcmp(chk.attribute("pl_face").as_string(), "left") == 0) {
       pl_face = CHAR_DIR_LEFT;
     } else {
-      printf("Error: incorrect player direction for checkpoint\n");
+      //printf("Error: incorrect player direction for checkpoint\n");
       exit(-1);
     }
 
@@ -599,18 +611,18 @@ void World::InitializeCheckpoints(const char* file) {
     }
     nxt_chks.push_back(nxt_chks_int);
 
-    printf(" - chk_x = %d\n", chk_x);
-    printf(" - chk_y = %d\n", chk_y);
-    printf(" - chk_width = %d\n", chk_width);
-    printf(" - chk_height = %d\n", chk_height);
-    printf(" - pl_x = %d\n", pl_x);
-    printf(" - pl_y = %d\n", pl_y);
-    printf(" - pl_face = %d\n", pl_face);
-    printf(" - nxt_chks=");
+    //printf(" - chk_x = %d\n", chk_x);
+    //printf(" - chk_y = %d\n", chk_y);
+    //printf(" - chk_width = %d\n", chk_width);
+    //printf(" - chk_height = %d\n", chk_height);
+    //printf(" - pl_x = %d\n", pl_x);
+    //printf(" - pl_y = %d\n", pl_y);
+    //printf(" - pl_face = %d\n", pl_face);
+    //printf(" - nxt_chks=");
     for(vector<int>::iterator it = nxt_chks_int.begin(); it != nxt_chks_int.end(); it++) {
-      printf("%d ", *it);
+      //printf("%d ", *it);
     }
-    printf("\n");
+    //printf("\n");
 
     // Create checkpoint
     Checkpoint* world_chk = new Checkpoint(chk_id, chk_x, chk_y, chk_width, chk_height, pl_x, pl_y, pl_face);
@@ -635,7 +647,7 @@ void World::InitializeCheckpoints(const char* file) {
       }
       // If not found then return an error
       if (!found) {
-        printf("Error: link checkpoint broken for chk_id=%d\n", num_chk);
+        //printf("Error: link checkpoint broken for chk_id=%d\n", num_chk);
         exit(-1);
       }
     }
@@ -645,7 +657,7 @@ void World::InitializeCheckpoints(const char* file) {
   current_checkpoint = *(checkpoints.begin());
   target_checkpoints = current_checkpoint->GetNextCheckpoints();
 
-  printf("---------------------------\n");
+  //printf("---------------------------\n");
 }
 
 
@@ -666,14 +678,14 @@ void World::InitializeTriggers(const char* file) {
   int  num_targets;
   pugi::xml_document trig_file;
 
-  printf("---------------------------\n");
-  printf("| Initializing triggers   |\n");
-  printf("---------------------------\n");
+  //printf("---------------------------\n");
+  //printf("| Initializing triggers   |\n");
+  //printf("---------------------------\n");
 
   pugi::xml_parse_result result = trig_file.load_file(file);
 
   if(!result) {
-    printf("Error: loading world trigger data\n");
+    //printf("Error: loading world trigger data\n");
     exit(-1);
   }
   
@@ -682,7 +694,7 @@ void World::InitializeTriggers(const char* file) {
        trig = trig.next_sibling()) {
     // First read attributes
     trig_id = trig.attribute("id").as_int();
-    printf("Trigger id = %d\n", trig_id);
+    ////printf("Trigger id = %d\n", trig_id);
 
     pugi::xml_node trig_attrs = trig.child("attributes");
     trig_x         = trig_attrs.attribute("x").as_int();
@@ -699,7 +711,7 @@ void World::InitializeTriggers(const char* file) {
     } else if ((strcmp(trig_attrs.attribute("action").as_string(), "hits")) == 0) {
       trig_action = ACTION_EVENT_HITS;
     } else {
-      printf("Error: wrong action type for trigger!\n");
+      //printf("Error: wrong action type for trigger!\n");
       exit(-1);
     }
 
@@ -710,17 +722,17 @@ void World::InitializeTriggers(const char* file) {
     } else if ((strcmp(trig_attrs.attribute("face").as_string(), "left")) == 0) {
       trig_face = ACTION_FACE_LEFT;
     } else {
-      printf("Error: wrong action face for trigger!\n");
+      //printf("Error: wrong action face for trigger!\n");
       exit(-1);
     }
     
-    printf(" - x = %d\n",      trig_x);
-    printf(" - y = %d\n",      trig_y);
-    printf(" - width = %d\n",  trig_width);
-    printf(" - height = %d\n", trig_height);
-    printf(" - recursive = %d\n", trig_recursive);
-    printf(" - action = %d\n", trig_action);
-    printf(" - face = %d\n",   trig_face);    
+    //printf(" - x = %d\n",      trig_x);
+    //printf(" - y = %d\n",      trig_y);
+    //printf(" - width = %d\n",  trig_width);
+    //printf(" - height = %d\n", trig_height);
+    //printf(" - recursive = %d\n", trig_recursive);
+    //printf(" - action = %d\n", trig_action);
+    //printf(" - face = %d\n",   trig_face);    
 
     // Create platform
     Trigger* world_trigger = new Trigger(trig_id,
@@ -732,14 +744,14 @@ void World::InitializeTriggers(const char* file) {
                                          trig_face,
                                          trig_recursive);
 
-    printf(" - targets:\n");
+    //printf(" - targets:\n");
     num_targets = 0;
     // Second, get targets
     pugi::xml_node targets = trig.child("targets");
     for (pugi::xml_node target = targets.first_child();
          target;
          target = target.next_sibling()) {
-      printf("\t - target %d:\n", num_targets);
+      //printf("\t - target %d:\n", num_targets);
       if (strcmp(target.attribute("type").as_string(), "platform") == 0) {
         target_type = OBJ_PLATFORM;
       } else if (strcmp(target.attribute("type").as_string(), "laser") == 0) {
@@ -747,18 +759,18 @@ void World::InitializeTriggers(const char* file) {
       } else if (strcmp(target.attribute("type").as_string(), "hazard") == 0) {
         target_type = OBJ_HAZARD;
       } else {
-        printf("Error: wrong target id in trigger definiton!\n");
+        //printf("Error: wrong target id in trigger definiton!\n");
         exit(-1);
       }
       target_id = target.attribute("id").as_int();
       target_delay = target.attribute("delay").as_int();
       target_trigger = target.attribute("trigger").as_bool();
       target_trigger_cond = target.attribute("trigger_cond").as_bool();
-      printf("\t\t - type=%s\n", target.attribute("type").as_string());
-      printf("\t\t - id=%d\n", target_id);
-      printf("\t\t - delay=%d\n", target_delay);
-      printf("\t\t - trigger=%d\n", target_trigger);
-      printf("\t\t - trigger_cond=%d\n", target_trigger_cond);
+      //printf("\t\t - type=%s\n", target.attribute("type").as_string());
+      //printf("\t\t - id=%d\n", target_id);
+      //printf("\t\t - delay=%d\n", target_delay);
+      //printf("\t\t - trigger=%d\n", target_trigger);
+      //printf("\t\t - trigger_cond=%d\n", target_trigger_cond);
 
       Object* target_ptr;
       if (target_type == OBJ_PLATFORM)
@@ -769,7 +781,7 @@ void World::InitializeTriggers(const char* file) {
         target_ptr = (Object*)GetHazard(target_id);
 
       if (target_ptr == nullptr) {
-        printf("Error: trying to associate an invalid target for this trigger!\n");
+        //printf("Error: trying to associate an invalid target for this trigger!\n");
         exit(-1);
       }
 
@@ -782,7 +794,7 @@ void World::InitializeTriggers(const char* file) {
 
   }  
 
-  printf("---------------------------\n");
+  //printf("---------------------------\n");
 }
 
 void World::InitializeLasers(const char* file) {
@@ -800,14 +812,14 @@ void World::InitializeLasers(const char* file) {
   int   laser_default_trigger;
   pugi::xml_document laser_file;  
 
-  printf("------------------------------\n");
-  printf("| Initializing laser objects |\n");
-  printf("------------------------------\n");
+  //printf("------------------------------\n");
+  //printf("| Initializing laser objects |\n");
+  //printf("------------------------------\n");
 
   pugi::xml_parse_result result = laser_file.load_file(file);
 
   if(!result) {
-    printf("Error: loading world lasers data\n");
+    //printf("Error: loading world lasers data\n");
   }
  
   for (pugi::xml_node laser = laser_file.child("lasers").first_child();
@@ -815,7 +827,7 @@ void World::InitializeLasers(const char* file) {
        laser = laser.next_sibling()) {
     // First read attributes
     laser_id = laser.attribute("id").as_int();
-    printf("Laser id = %d\n", laser_id);
+    //printf("Laser id = %d\n", laser_id);
     
     laser_x         = laser.attribute("x").as_int();
     laser_y         = laser.attribute("y").as_int();
@@ -830,7 +842,7 @@ void World::InitializeLasers(const char* file) {
     } else if (strcmp(laser.attribute("type").as_string(), "diagonal") == 0) {
       laser_type = LASER_TYPE_DIAGONAL;
     } else {
-      printf("Error: incorrect type for laser\n");
+      //printf("Error: incorrect type for laser\n");
       exit(-1);
     }
     laser_speed = laser.attribute("speed").as_float();
@@ -841,20 +853,20 @@ void World::InitializeLasers(const char* file) {
     } else if (strcmp(laser.attribute("direction").as_string(), "left") == 0) {
       laser_direction = OBJ_DIR_LEFT;
     } else {
-      printf("Error: incorrect direction for laser\n");
+      //printf("Error: incorrect direction for laser\n");
       exit(-1);
     }
-    printf(" - x = %d\n", laser_x);
-    printf(" - y = %d\n", laser_y);
-    printf(" - bb_x = %d\n", laser_bb_x);
-    printf(" - bb_y = %d\n", laser_bb_y);
-    printf(" - bb_width = %d\n", laser_bb_width);
-    printf(" - bb_height = %d\n", laser_bb_height);
-    printf(" - type = %d\n", laser_type);
-    printf(" - onehot = %d\n", laser_onehot);
-    printf(" - direction = %d\n", laser_direction);
-    printf(" - speed = %f\n", laser_speed);
-    printf(" - default_trigger = %d\n", laser_default_trigger);
+    //printf(" - x = %d\n", laser_x);
+    //printf(" - y = %d\n", laser_y);
+    //printf(" - bb_x = %d\n", laser_bb_x);
+    //printf(" - bb_y = %d\n", laser_bb_y);
+    //printf(" - bb_width = %d\n", laser_bb_width);
+    //printf(" - bb_height = %d\n", laser_bb_height);
+    //printf(" - type = %d\n", laser_type);
+    //printf(" - onehot = %d\n", laser_onehot);
+    //printf(" - direction = %d\n", laser_direction);
+    //printf(" - speed = %f\n", laser_speed);
+    //printf(" - default_trigger = %d\n", laser_default_trigger);
 
     // Create checkpoint
     Laser* world_laser = new Laser(laser.attribute("file").as_string(),
@@ -868,7 +880,7 @@ void World::InitializeLasers(const char* file) {
     objects.push_back(world_laser);
   }  
 
-  printf("---------------------------\n");
+  //printf("---------------------------\n");
 }
 
 void World::InitializeEnemies(const char* file) {
@@ -892,14 +904,14 @@ void World::InitializeEnemies(const char* file) {
   int   enemy_ia_limit_y;
   pugi::xml_document enemy_file;
 
-  printf("------------------------------------\n");
-  printf("| Initializing enemies             |\n");
-  printf("------------------------------------\n");
+  //printf("------------------------------------\n");
+  //printf("| Initializing enemies             |\n");
+  //printf("------------------------------------\n");
 
   pugi::xml_parse_result result = enemy_file.load_file(file);
 
   if(!result) {
-    printf("Error: loading world enemies data\n");
+    //printf("Error: loading world enemies data\n");
   }
  
   for (pugi::xml_node enemy = enemy_file.child("enemies").first_child();
@@ -907,7 +919,7 @@ void World::InitializeEnemies(const char* file) {
        enemy = enemy.next_sibling()) {
     // First read attributes
     enemy_id = enemy.attribute("id").as_int();
-    printf("Enemy id = %d\n", enemy_id);
+    ////printf("Enemy id = %d\n", enemy_id);
     
     enemy_x         = enemy.attribute("x").as_int();
     enemy_y         = enemy.attribute("y").as_int();
@@ -922,7 +934,7 @@ void World::InitializeEnemies(const char* file) {
     } else if (strcmp(enemy.attribute("direction").as_string(), "left") == 0) {
       enemy_direction = CHAR_DIR_LEFT;
     } else {
-      printf("Error: incorrect direction for enemy\n");
+      //printf("Error: incorrect direction for enemy\n");
       exit(-1);
     }
     if (strcmp(enemy.attribute("ia_type").as_string(), "walker") == 0) {
@@ -930,7 +942,7 @@ void World::InitializeEnemies(const char* file) {
     } else if (strcmp(enemy.attribute("ia_type").as_string(), "chaser") == 0) {
       enemy_ia_type = ENEMY_IA_CHASER;
     } else {
-      printf("Error: incorrect ia type for enemy\n");
+      //printf("Error: incorrect ia type for enemy\n");
       exit(-1);
     }
     enemy_ia_random      = enemy.attribute("ia_random").as_bool();
@@ -941,24 +953,24 @@ void World::InitializeEnemies(const char* file) {
     enemy_ia_limit_x     = enemy.attribute("ia_limit_x").as_int();
     enemy_ia_limit_y     = enemy.attribute("ia_limit_y").as_int();
 
-    printf(" - file = %s\n", enemy.attribute("file").as_string());
-    printf(" - x = %d\n", enemy_x);
-    printf(" - y = %d\n", enemy_y);
-    printf(" - bb_x = %d\n", enemy_bb_x);
-    printf(" - bb_y = %d\n", enemy_bb_y);
-    printf(" - bb_width = %d\n", enemy_bb_width);
-    printf(" - bb_height = %d\n", enemy_bb_height);
-    printf(" - speed_x=%f\n", enemy_speed_x);
-    printf(" - speed_y=%f\n", enemy_speed_y);
-    printf(" - direction = %d\n", enemy_direction);
-    printf(" - ia_type = %d\n", enemy_ia_type);
-    printf(" - ia_random = %d\n", enemy_ia_random);
-    printf(" - ia_randomness = %d\n", enemy_ia_randomness);
-    printf(" - ia_block_steps = %d\n", enemy_ia_block_steps);
-    printf(" - ia_orig_x = %d\n", enemy_ia_orig_x);
-    printf(" - ia_orig_y = %d\n", enemy_ia_orig_y);
-    printf(" - ia_limit_x = %d\n", enemy_ia_limit_x);
-    printf(" - ia_limit_y = %d\n", enemy_ia_limit_y);
+    //printf(" - file = %s\n", enemy.attribute("file").as_string());
+    //printf(" - x = %d\n", enemy_x);
+    //printf(" - y = %d\n", enemy_y);
+    //printf(" - bb_x = %d\n", enemy_bb_x);
+    //printf(" - bb_y = %d\n", enemy_bb_y);
+    //printf(" - bb_width = %d\n", enemy_bb_width);
+    //printf(" - bb_height = %d\n", enemy_bb_height);
+    //printf(" - speed_x=%f\n", enemy_speed_x);
+    //printf(" - speed_y=%f\n", enemy_speed_y);
+    //printf(" - direction = %d\n", enemy_direction);
+    //printf(" - ia_type = %d\n", enemy_ia_type);
+    //printf(" - ia_random = %d\n", enemy_ia_random);
+    //printf(" - ia_randomness = %d\n", enemy_ia_randomness);
+    //printf(" - ia_block_steps = %d\n", enemy_ia_block_steps);
+    //printf(" - ia_orig_x = %d\n", enemy_ia_orig_x);
+    //printf(" - ia_orig_y = %d\n", enemy_ia_orig_y);
+    //printf(" - ia_limit_x = %d\n", enemy_ia_limit_x);
+    //printf(" - ia_limit_y = %d\n", enemy_ia_limit_y);
 
     // Create enemy
     Enemy* world_enemy = new Enemy(enemy.attribute("file").as_string(),
@@ -971,7 +983,7 @@ void World::InitializeEnemies(const char* file) {
     enemies.push_back(world_enemy);
   }  
 
-  printf("---------------------------\n");
+  //printf("---------------------------\n");
 }
 
 void World::InitializeCameraViews(const char* file) {
@@ -982,14 +994,14 @@ void World::InitializeCameraViews(const char* file) {
   int right_down_y;
   pugi::xml_document view_file;
 
-  printf("------------------------------------\n");
-  printf("| Initializing camera views        |\n");
-  printf("------------------------------------\n");
+  //printf("------------------------------------\n");
+  //printf("| Initializing camera views        |\n");
+  //printf("------------------------------------\n");
 
   pugi::xml_parse_result result = view_file.load_file(file);
 
   if(!result) {
-    printf("Error: loading world camera view data\n");
+    //printf("Error: loading world camera view data\n");
   }
  
   for (pugi::xml_node view = view_file.child("views").first_child();
@@ -997,24 +1009,24 @@ void World::InitializeCameraViews(const char* file) {
        view = view.next_sibling()) {
     // First read attributes
     view_id = view.attribute("id").as_int();
-    printf("View id = %d\n", view_id);
+    //printf("View id = %d\n", view_id);
     
     left_up_x    = view.attribute("left_up_x").as_int();
     left_up_y    = view.attribute("left_up_y").as_int();
     right_down_x = view.attribute("right_down_x").as_int();
     right_down_y = view.attribute("right_down_y").as_int();
 
-    printf(" - left_up_x = %d\n", left_up_x);
-    printf(" - left_up_y = %d\n", left_up_y);
-    printf(" - right_down_x = %d\n", right_down_x);
-    printf(" - right_down_y = %d\n", right_down_y);
+    //printf(" - left_up_x = %d\n", left_up_x);
+    //printf(" - left_up_y = %d\n", left_up_y);
+    //printf(" - right_down_x = %d\n", right_down_x);
+    //printf(" - right_down_y = %d\n", right_down_y);
 
     // Create camera view
     CameraView* world_view = new CameraView(view_id, left_up_x, left_up_y, right_down_x, right_down_y);
     camera_views.push_back(world_view);
   }
 
-  printf("---------------------------\n");
+  //printf("---------------------------\n");
 }
 
 int World::GetMapWidth() {
@@ -1089,7 +1101,7 @@ Tile* World::GetTileByCoord(int x, int y)
 
 void World::WorldStep(Character* player) {
   // Perform an step of all elements belonging to the world level
-  //printf("[WorldStep] Moving platforms...\n");
+  ////printf("[WorldStep] Moving platforms...\n");
   for (vector<Platform*>::iterator it = platforms.begin() ; it != platforms.end(); ++it) {
       (*it)->PlatformStep();
       // REVISIT: remove this code
@@ -1099,7 +1111,7 @@ void World::WorldStep(Character* player) {
   }
 
   // Back objects (no deleteable)
-  //printf("[WorldStep] Moving back objects...\n");
+  ////printf("[WorldStep] Moving back objects...\n");
   for (list<Object*>::iterator it = back_objects.begin() ; it != back_objects.end(); ++it) {
     Object* object = *it;
     if (object->GetActive()) {      
@@ -1114,7 +1126,7 @@ void World::WorldStep(Character* player) {
   }
 
   // Blocks
-  //printf("[WorldStep] Moving blocks...\n");
+  ////printf("[WorldStep] Moving blocks...\n");
   for (list<Block*>::iterator it = blocks.begin() ; it != blocks.end(); ++it) {
     Block* block = *it;
     if (block->GetState() == OBJ_STATE_DEAD) {
@@ -1126,7 +1138,7 @@ void World::WorldStep(Character* player) {
   }
 
   // Global objects
-  //printf("[WorldStep] Moving global objects...\n");
+  ////printf("[WorldStep] Moving global objects...\n");
   for (list<Object*>::iterator it = objects.begin() ; it != objects.end(); ++it) {
     Object* object = *it;
 
@@ -1136,8 +1148,8 @@ void World::WorldStep(Character* player) {
         ((Hazard*)object)->SetTrigger();
     }
 
+
     if (object->GetState() == OBJ_STATE_DEAD) {
-      //printf("[WorldStep] Object dead %d\n", object->GetId());
       // REVISIT: need to add STATIC OBJECT here? Same for other objects that may persists (LASER)
       switch (object->GetType()) {
         case OBJ_ITEM:
@@ -1152,13 +1164,14 @@ void World::WorldStep(Character* player) {
           bomb_exists = false;
           break;
         default:
-          printf("[WARNING] Unknown object type to be deleted in World!\n");
+          //printf("[WARNING] Unknown object type to be deleted in World!\n");
           break;
       }
+      
       it = objects.erase(it);                            // Remove element if it is dead.
-      //printf("[WorldStep] Removed object from object list\n");
+      ////printf("[WorldStep] Removed object from object list\n");
     } else if (object->GetActive()) {
-      //printf("Object active id = %d, type = %d\n", object->GetId(), object->GetType());
+      ////printf("Object active id = %d, type = %d\n", object->GetId(), object->GetType());
       switch (object->GetType()) {
         case OBJ_ITEM:
           ((Item*)object)->ObjectStep(this, player);
@@ -1186,8 +1199,9 @@ void World::WorldStep(Character* player) {
     }
   }
 
+
   // Handle checkpoints
-  //printf("[WorldStep] Handling checkpoints...\n");
+  ////printf("[WorldStep] Handling checkpoints...\n");
   if (player->GetState() != CHAR_STATE_DYING) {
     for (vector<Checkpoint*>::iterator it = target_checkpoints->begin(); it != target_checkpoints->end(); it++) {
       Checkpoint* checkpoint = *it;
@@ -1210,32 +1224,32 @@ void World::WorldStep(Character* player) {
                          player->GetDirection(), player->GetState());
   }
 
-  // Handle enemies
-  //printf("[WorldStep] Handling enemies...\n");
-  for (vector<Character*>::iterator it = enemies.begin(); it != enemies.end(); it++) {
-    Enemy* enemy = (Enemy*)*it;
-    enemy->CharacterStep(this, player);
-  }
+  // // Handle enemies
+  // ////printf("[WorldStep] Handling enemies...\n");
+  // for (vector<Character*>::iterator it = enemies.begin(); it != enemies.end(); it++) {
+  //   Enemy* enemy = (Enemy*)*it;
+  //   enemy->CharacterStep(this, player);
+  // }
 
   // Check if player has been killed in this step
   // REVISIT: this check can be done at the begginning of this function and avoid
   // traversing some of the list. Triggers for instance is traversed two times.
   if (player->GetKilled()) {
-    printf("[WorldStep] Player killed!\n");
+    //printf("[WorldStep] Player killed!\n");
     // If player got killed, then reset the triggers
     for (list<Trigger*>:: iterator it = triggers.begin(); it != triggers.end(); it++) {
       Trigger* trigger = *it;
       trigger->Reset();
     }
-    // Traverse some objects to reset them if required
-    for (list<Object*>::iterator it = objects.begin() ; it != objects.end(); ++it) {
-      Object* object = *it;
-      if (object->GetType() == OBJ_LASER)
-        ((Laser*)object)->Reset();
-    }
+    // // Traverse some objects to reset them if required
+    // for (list<Object*>::iterator it = objects.begin() ; it != objects.end(); ++it) {
+    //   Object* object = *it;
+    //   if (object->GetType() == OBJ_LASER)
+    //     ((Laser*)object)->Reset();
+    // }
   }
 
-  //printf("[WorldStep] Completed!\n");  
+  ////printf("[WorldStep] Completed!\n");  
 }
 
 bool World::CreateNewShoot(int x, int y, int direction) {
@@ -1255,7 +1269,7 @@ bool World::CreateNewBomb(int x, int y, int direction) {
   bool created = false;
   // Allow only one bomb to be created right now
   if (!bomb_exists) {    
-    printf("CreateNewBomb x=%d, y=%d\n", x, y);
+    //printf("CreateNewBomb x=%d, y=%d\n", x, y);
     Bomb* shoot = new Bomb("../designs/bomb/bomb.xml", x, y - 1, 25, 22, direction);
     // REVISIT: not sure why height is 16. May it be 17?
     shoot->SetBoundingBox(8, 10, 10, 13);

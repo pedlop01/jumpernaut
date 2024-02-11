@@ -38,6 +38,7 @@ void Animation::AnimStep() {
     current_anim = (current_anim + 1) % sprites.size();
     steps_in_anim = 0;
   }
+  //printf("Animation = %d, speed = %d, sprites size = %zu\n", steps_in_anim, speed, sprites.size());
 }
 
 bool Animation::CompletedLastAnim() {

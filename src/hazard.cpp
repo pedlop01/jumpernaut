@@ -177,7 +177,7 @@ void Hazard::HazardStep(World* map, Character* player) {
   // Handle current actions
   Action* current_action_ptr = *current_action;
   current_speed = current_action_ptr->GetSpeed();
-  //printf("hazard dir=%d, desp=%d, wait=%d\n", current_action_ptr->GetDirection(), current_action_ptr->GetDesp(), current_action_ptr->GetWait());
+  ////printf("hazard dir=%d, desp=%d, wait=%d\n", current_action_ptr->GetDirection(), current_action_ptr->GetDesp(), current_action_ptr->GetWait());
   switch (current_action_ptr->GetDirection()) {    
     case OBJ_DIR_STOP:
       state = OBJ_STATE_STOP;

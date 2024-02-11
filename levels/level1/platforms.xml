@@ -1,6 +1,6 @@
 ﻿<platforms>
-  <platform id="0">
-    <attributes file="../designs/platforms/platforms.xml" ini_x="800" ini_y="1656" width="24" height="8" visible="1" recursive="1" one_use="0" ini_state="stop"></attributes>
+ <platform id="0">
+    <attributes file="../designs/platforms/platforms.xml" ini_x="200" ini_y="1500" width="24" height="8" visible="1" recursive="1" one_use="0" ini_state="stop"></attributes>
     <actions>
       <action direction="down" desp="64" wait="0" speed="1" cond="0"></action>
       <action direction="stop" desp="0" wait="50" speed="0" cond="0"></action>
@@ -9,6 +9,25 @@
     </actions>
   </platform>
   <platform id="1">
+   <attributes file="../designs/platforms/platforms.xml" ini_x="100" ini_y="1400" width="24" height="8" visible="1" recursive="1" one_use="0" ini_state="stop"></attributes>
+    <actions>
+      <action direction="down" desp="64" wait="0" speed="1" cond="0"></action>
+      <action direction="stop" desp="0" wait="50" speed="0" cond="0"></action>
+      <action direction="up" desp="64" wait="0" speed="1" cond="0"></action>
+      <action direction="stop" desp="0" wait="50" speed="0" cond="0"></action>
+    </actions>
+  </platform>
+  <!-- <platform id="0">
+  
+    <attributes file="../designs/platforms/platforms.xml" ini_x="800" ini_y="1656" width="24" height="8" visible="1" recursive="1" one_use="0" ini_state="stop"></attributes>
+    <actions>
+      <action direction="down" desp="64" wait="0" speed="1" cond="0"></action>
+      <action direction="stop" desp="0" wait="50" speed="0" cond="0"></action>
+      <action direction="up" desp="64" wait="0" speed="1" cond="0"></action>
+      <action direction="stop" desp="0" wait="50" speed="0" cond="0"></action>
+    </actions>
+  </platform> -->
+  <!-- <platform id="1">
     <attributes file="../designs/platforms/platforms.xml" ini_x="868" ini_y="1240" width="24" height="8" visible="1" recursive="0" one_use="0" ini_state="stop"></attributes>
     <actions>
       <action direction="down" desp="64" wait="0" speed="2" cond="0"></action>
@@ -136,5 +155,5 @@
       <action direction="stop" desp="0" wait="40" speed="0" cond="0"></action>
       <action direction="down" desp="32" wait="0" speed="2" cond="0"></action>
     </actions>
-  </platform>
+  </platform> -->
 </platforms>

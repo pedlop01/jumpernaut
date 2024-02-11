@@ -22,17 +22,20 @@ Player::Player() : Character() {
   bb_height_orig = bb_height;
 }
 
-Player::Player(const char* file) : Character(file) {
+Player::Player(World* map, const char* file) : Character(file) {
   type = CHARACTER_PLAYER;
+ 
 
-  pos_x = 264;  // REVISIT: should be 0
-  pos_y = 2000; // REVISIT: should be 0
 
   using_bb = true;
   height = 21;  // REVISIT: should be 0
   width  = 23;  // REVISIT: should be 0
   height_orig = height;
   width_orig = width;
+
+  pos_x = 0;  // REVISIT: should be 0
+  pos_y = map->GetMapHeight()*map->GetTilesetHeight() - (height + 8); // REVISIT: should be 0
+  std::cout << pos_y << " ,, " << height << std::endl;
 
   // REVISIT: think on how to pass this information automatically
   bb_x = 5;

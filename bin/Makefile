@@ -20,14 +20,14 @@ OBJ_FILES := $(patsubst $(SRC_DIR)/%.cpp,%.o,$(wildcard $(SRC_DIR)/*.cpp)) $(pat
 
 # Main rule
 rick2: $(OBJ_FILES)
-	g++ -o rick2 $(OBJ_FILES) $(CXXFLAGS) $(LDFLAGS)
+	g++ -g -o rick2 $(OBJ_FILES) -O3 $(CXXFLAGS) $(LDFLAGS)
 
 # Object compile rules
 %.o: $(SRC_DIR)/%.cpp
-	g++ $(CXXFLAGS) -c $< -o $@
+	g++ -g  $(CXXFLAGS) -c $< -o $@
 
 %.o: $(UTILS_DIR)/%.cpp
-	g++ $(CXXFLAGS) -c $< -o $@
+	g++ -g $(CXXFLAGS) -c $< -o $@
 
 clean:
 	rm -f *.o rick2
