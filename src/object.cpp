@@ -775,7 +775,6 @@ void Object::ComputeNextSpeed() {
 }
 
 void Object::ObjectStep(World* map, Character* player) {
-
 //  printf("[Object] ComputeCollisions\n");
   this->ComputeCollisions(map, player);
 //  printf("[Object] ComputeNextState\n");

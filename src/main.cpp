@@ -29,7 +29,6 @@ using namespace std;
 int main(int argc, char *argv[]) {
   // Allegro variables
   ALLEGRO_DISPLAY*       display     = NULL;
-  ALLEGRO_BITMAP*        bitmap      = NULL;
   ALLEGRO_EVENT_QUEUE*   event_queue = NULL;
   ALLEGRO_SAMPLE*        sample      = NULL;
   ALLEGRO_MOUSE_STATE    mouse_state;
@@ -75,13 +74,6 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  bitmap = al_create_bitmap(SCREEN_X, SCREEN_Y);
-  if(!bitmap) {
-    printf("Error: failed to create bitmap!\n");
-    al_destroy_display(display);
-    return -1;
-  }
-
   if(!al_init_primitives_addon()) {
     printf("Error: failed to initialize allegro primitives!\n");
     return -1;
@@ -112,12 +104,6 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  al_set_target_bitmap(bitmap);
-  al_clear_to_color(al_map_rgb(0, 0, 0));
-  al_set_target_bitmap(al_get_backbuffer(display));
-  al_draw_bitmap(bitmap, 0, 0, 0);
-  al_flip_display();
-
   event_queue = al_create_event_queue();
   if(!event_queue) {
     printf("Error: failted to create event_queue!\n");
@@ -128,7 +114,7 @@ int main(int argc, char *argv[]) {
 
   // Game initializations
   map_level1 = new World("../maps/level1/Map1_prueba.tmx", &sound_handler, false);
-  camera.InitCamera(0, 0, CAMERA_X, CAMERA_Y, map_level1, bitmap);
+  camera.InitCamera(0, 0, CAMERA_X, CAMERA_Y, map_level1, display);
   player = new Player("../characters/rick.xml");
   player->RegisterCamera(&camera);
   player->RegisterSoundHandler(&sound_handler);
@@ -138,11 +124,12 @@ int main(int argc, char *argv[]) {
 
   // Initialize sounds and start playing music for level 1 (the only implemented at this moment)
   sound_handler.InitializeSounds();
-  sound_handler.PlayMusic(0);
+//  sound_handler.PlayMusic(0);
 
   // Main loop
+  bool exit = false;
   do {
-    al_set_target_bitmap(bitmap);
+    //al_set_target_bitmap(bitmap);
 
     keyboard.ReadKeyboard(event_queue);
     
@@ -151,7 +138,7 @@ int main(int argc, char *argv[]) {
     if (mouse_state.buttons & 1)
       printf("Mouse coord x = %d, y = %d\n", camera.GetPosX() + mouse_state.x/2, camera.GetPosY() + mouse_state.y/2);
 
-    if(keyboard.PressedESC())   { return 0; }
+    if(keyboard.PressedESC())   { exit = true; }
 
     // Perform an step of all elements belonging to the world level
     //printf("[Main] World step\n");
@@ -166,22 +153,28 @@ int main(int argc, char *argv[]) {
 
     // Check counter value for adding waiting time
     double delay = timer.GetCounter();
+#if 0
     if(delay < 20)
 #ifdef __WIN32
       Sleep(20 - delay);
 #else
       sleep(0.00002 - delay);
 #endif
+#endif
 
     // Move bitmap into display
     al_set_target_bitmap(al_get_backbuffer(display));
-    al_draw_bitmap(bitmap, 0, 0, 0);    
     al_flip_display();
 
     // Start counter again for next iteration
     timer.StartCounter();
-  } while(true);
+  } while(!exit);
 
   al_destroy_display(display);
+
+  delete(player);
+  delete(map_level1);
+
+  return 0;
 }
 

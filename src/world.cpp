@@ -1088,7 +1088,6 @@ Tile* World::GetTileByCoord(int x, int y)
 }
 
 void World::WorldStep(Character* player) {
-
   // Perform an step of all elements belonging to the world level
   //printf("[WorldStep] Moving platforms...\n");
   for (vector<Platform*>::iterator it = platforms.begin() ; it != platforms.end(); ++it) {
