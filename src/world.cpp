@@ -118,25 +118,25 @@ World::World(const char *file, SoundHandler* sound_handler, bool tileExtractedOp
 
 
   // Read platforms
-  this->InitializePlatforms("../levels/level1/platforms.xml");
-  // // Read items
-  // this->InitializeItems("../levels/level1/items.xml", sound_handler);
-  // // Read dynamic background objects
-  // this->InitializeDynamicBackObjects("../levels/level1/anim_tiles.xml");
-  // // Read blocks
-  // this->InitializeBlocks("../levels/level1/blocks.xml");
-  // // Read hazards
-  // this->InitializeHazards("../levels/level1/hazards.xml");
-  // // Read checkpoints
-  this->InitializeCheckpoints("../levels/level1/checkpoints.xml");
-  // // Read lasers
-  // this->InitializeLasers("../levels/level1/lasers.xml");
+  this->InitializePlatforms("../levels/level1_jump/platforms.xml");
+  // Read items
+  //this->InitializeItems("../levels/level1_jump/items.xml", sound_handler);
+  // Read dynamic background objects
+  //this->InitializeDynamicBackObjects("../levels/level1_jump/anim_tiles.xml");
+  // Read blocks
+  //this->InitializeBlocks("../levels/level1_jump/blocks.xml");
+  // Read hazards
+  //this->InitializeHazards("../levels/level1_jump/hazards.xml");
+  // Read checkpoints
+  this->InitializeCheckpoints("../levels/level1_jump/checkpoints.xml");
+  // Read lasers
+  //this->InitializeLasers("../levels/level1_jump/lasers.xml");
   // Read triggers
-  this->InitializeTriggers("../levels/level1/triggers.xml");
-  // // Read enemies
-  // this->InitializeEnemies("../levels/level1/enemies.xml");
-  // // Read camera views
-  // this->InitializeCameraViews("../levels/level1/camera_views.xml");
+  this->InitializeTriggers("../levels/level1_jump/triggers.xml");
+  // Read enemies
+  //this->InitializeEnemies("../levels/level1_jump/enemies.xml");
+  // Read camera views
+  //this->InitializeCameraViews("../levels/level1_jump/camera_views.xml");
 
 
   printf("Finish load world map \n");
@@ -678,16 +678,15 @@ void World::InitializeTriggers(const char* file) {
   int  num_targets;
   pugi::xml_document trig_file;
 
+  assert(file != nullptr);
+
   //printf("---------------------------\n");
   //printf("| Initializing triggers   |\n");
   //printf("---------------------------\n");
 
   pugi::xml_parse_result result = trig_file.load_file(file);
 
-  if(!result) {
-    //printf("Error: loading world trigger data\n");
-    exit(-1);
-  }
+  //assert(!result && "Error: loading world trigger data\n");
   
   for (pugi::xml_node trig = trig_file.child("triggers").first_child();
        trig;
@@ -1105,9 +1104,9 @@ void World::WorldStep(Character* player) {
   for (vector<Platform*>::iterator it = platforms.begin() ; it != platforms.end(); ++it) {
       (*it)->PlatformStep();
       // REVISIT: remove this code
-      //if (player->GetState() == CHAR_STATE_HITTING) {
-      //  (*it)->SetTrigger();
-      //}
+      if (player->GetState() == CHAR_STATE_HITTING) {
+        (*it)->SetTrigger();
+      }
   }
 
   // Back objects (no deleteable)
@@ -1224,12 +1223,12 @@ void World::WorldStep(Character* player) {
                          player->GetDirection(), player->GetState());
   }
 
-  // // Handle enemies
-  // ////printf("[WorldStep] Handling enemies...\n");
-  // for (vector<Character*>::iterator it = enemies.begin(); it != enemies.end(); it++) {
-  //   Enemy* enemy = (Enemy*)*it;
-  //   enemy->CharacterStep(this, player);
-  // }
+  // Handle enemies
+  //printf("[WorldStep] Handling enemies...\n");
+  for (vector<Character*>::iterator it = enemies.begin(); it != enemies.end(); it++) {
+    Enemy* enemy = (Enemy*)*it;
+    enemy->CharacterStep(this, player);
+  }
 
   // Check if player has been killed in this step
   // REVISIT: this check can be done at the begginning of this function and avoid
@@ -1241,15 +1240,15 @@ void World::WorldStep(Character* player) {
       Trigger* trigger = *it;
       trigger->Reset();
     }
-    // // Traverse some objects to reset them if required
-    // for (list<Object*>::iterator it = objects.begin() ; it != objects.end(); ++it) {
-    //   Object* object = *it;
-    //   if (object->GetType() == OBJ_LASER)
-    //     ((Laser*)object)->Reset();
-    // }
+    // Traverse some objects to reset them if required
+    for (list<Object*>::iterator it = objects.begin() ; it != objects.end(); ++it) {
+      Object* object = *it;
+      if (object->GetType() == OBJ_LASER)
+        ((Laser*)object)->Reset();
+    }
   }
 
-  ////printf("[WorldStep] Completed!\n");  
+  //printf("[WorldStep] Completed!\n");  
 }
 
 bool World::CreateNewShoot(int x, int y, int direction) {

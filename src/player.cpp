@@ -33,7 +33,7 @@ Player::Player(World* map, const char* file) : Character(file) {
   height_orig = height;
   width_orig = width;
 
-  pos_x = 0;  // REVISIT: should be 0
+  pos_x = 0;//258;  // REVISIT: should be 0
   pos_y = map->GetMapHeight()*map->GetTilesetHeight() - (height + 8); // REVISIT: should be 0
   std::cout << pos_y << " ,, " << height << std::endl;
 

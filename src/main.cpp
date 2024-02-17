@@ -121,7 +121,7 @@ int main(int argc, char *argv[]) {
   al_register_event_source(event_queue, al_get_keyboard_event_source());
 
   // Game initializations  
-  map_level1 = new World("../maps/level1/Map_vertical.json", &sound_handler, false);
+  map_level1 = new World("../maps/level1_jump/Map_vertical.json", &sound_handler, false);
   camera.InitCamera(0, 0, CAMERA_X, CAMERA_Y, map_level1, display);
   player = new Player(map_level1, "../characters/rick.xml");
   player->RegisterCamera(&camera);
@@ -151,6 +151,7 @@ int main(int argc, char *argv[]) {
     if (mouse_state.buttons & 1) printf("Mouse coord x = %d, y = %d\n", camera.GetPosX() + mouse_state.x/2, camera.GetPosY() + mouse_state.y/2);
 
     if(keyboard.PressedESC()) exit = true;
+    if(keyboard.PressedK()) player->SetKilled(map_level1);
 
     // Perform an step of all elements belonging to the world level
     ////printf("[Main] World step\n");
@@ -160,27 +161,19 @@ int main(int argc, char *argv[]) {
     // Handle player
     player->CharacterStep(map_level1, keyboard);
 
-    auto now = steady_clock::now();
-    auto elapsed = duration_cast<seconds>(now - start);
-    // if (elapsed.count() >= 5 && !actionTriggered) {
-    //     player->SetKilled(map_level1);
-    //     actionTriggered = true; // Asegúrate de no llamar a la acción más de una vez
-    //     std::cout << "Acción ejecutada después de 5 segundos." << std::endl;
-    // }
-
-
     ////printf("[Main] Camera positioning and drawing\n");
     camera.CameraStep(map_level1, player, font);
 
     // Check counter value for adding waiting time
     double delay = timer.GetCounter();
 
-    if(delay < 20)
+    if(delay < 20) {
 #ifdef __WIN32
       Sleep(20 - delay);
 #else
       sleep(0.00002 - delay);
 #endif
+    }
 
     // Move bitmap into display
     al_set_target_bitmap(al_get_backbuffer(display));
