@@ -1,8 +1,8 @@
 ﻿<triggers>
  <trigger id="0">
-    <attributes x="50" y="1550" width="50" height="50" action="hits" face="left" onehot="1" recursive="0"></attributes>
+    <attributes x="50" y="1550" width="16" height="50" action="stays" face="any" onehot="1" recursive="0"></attributes>
     <targets>
-      <target type="platform" id="2" delay="0" trigger="1" trigger_cond="0"></target>
+      <target type="platform" id="0" delay="0" trigger="1" trigger_cond="0"></target>
     </targets>
   </trigger>
   <!-- <trigger id="0">

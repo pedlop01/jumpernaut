@@ -41,6 +41,8 @@ class Platform : public Object {
              bool _one_use);
     ~Platform();
 
+    void Reset();
+
     // Add new action
     void AddAction(int direction, int desp, int wait, float speed, int cond);
 

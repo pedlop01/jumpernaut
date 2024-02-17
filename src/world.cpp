@@ -198,6 +198,13 @@ void World::InitializePlatforms(const char* file) {
   //printf("| Initializing platforms  |\n");
   //printf("---------------------------\n");
 
+  // JsonFileManager manager(file);
+  // manager.read();
+  
+  // // Save json data into var
+  // const json& data = manager.getData(); 
+
+
   pugi::xml_parse_result result = plat_file.load_file(file);
 
   if(!result) {
@@ -285,6 +292,12 @@ void World::InitializePlatforms(const char* file) {
   }  
 
   printf("Platforms loaded ---------------------------\n");
+}
+
+void World::ResetPlatforms() {
+    for (vector<Platform*>::iterator it = platforms.begin(); it != platforms.end(); it++) {
+      (*it)->Reset();
+    }
 }
 
 void World::InitializeHazards(const char* file) {
@@ -1241,6 +1254,8 @@ void World::WorldStep(Character* player) {
       Trigger* trigger = *it;
       trigger->Reset();
     }
+
+    this->ResetPlatforms();
     // // Traverse some objects to reset them if required
     // for (list<Object*>::iterator it = objects.begin() ; it != objects.end(); ++it) {
     //   Object* object = *it;

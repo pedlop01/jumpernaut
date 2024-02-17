@@ -162,11 +162,11 @@ int main(int argc, char *argv[]) {
 
     auto now = steady_clock::now();
     auto elapsed = duration_cast<seconds>(now - start);
-    // if (elapsed.count() >= 5 && !actionTriggered) {
-    //     player->SetKilled(map_level1);
-    //     actionTriggered = true; // Asegúrate de no llamar a la acción más de una vez
-    //     std::cout << "Acción ejecutada después de 5 segundos." << std::endl;
-    // }
+    if (elapsed.count() >= 5 && !actionTriggered) {
+        player->SetKilled(map_level1);
+        actionTriggered = true; // Asegúrate de no llamar a la acción más de una vez
+        std::cout << "Acción ejecutada después de 5 segundos." << std::endl;
+    }
 
 
     ////printf("[Main] Camera positioning and drawing\n");

@@ -163,6 +163,8 @@ class World
         void  InitializeEnemies(const char* file);
         void  InitializeCameraViews(const char* file);
 
+        void  ResetPlatforms();
+
         bool  CreateNewShoot(int x, int y, int direction);
         bool  CreateNewBomb(int x, int y, int direction);
 

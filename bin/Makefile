@@ -2,7 +2,7 @@ PLATFORM := $(shell uname -s)
 
 # Compilation falgs
 ifeq ($(PLATFORM),Linux)
-    CXXFLAGS := -O2 -std=c++17 -Wall
+    CXXFLAGS := -std=c++17 -Wall
     LDFLAGS := `pkg-config --libs allegro-5 allegro_primitives-5 allegro_image-5 allegro_font-5 allegro_ttf-5 allegro_audio-5 allegro_acodec-5`
 else ifeq ($(PLATFORM),Darwin) # macOS
     CXXFLAGS := -std=c++17
