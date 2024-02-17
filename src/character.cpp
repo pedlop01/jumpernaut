@@ -174,8 +174,6 @@ void Character::Reset() {
   bb_height = 21;
   bb_height_orig = bb_height;
 
-  std::cout << "ppppppp: " << initial_y <<  std::endl;
-
   killed = false;
 }
 
