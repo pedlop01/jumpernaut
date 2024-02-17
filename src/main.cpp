@@ -120,14 +120,10 @@ int main(int argc, char *argv[]) {
 
   al_register_event_source(event_queue, al_get_keyboard_event_source());
 
-  // Game initializations
+  // Game initializations  
   map_level1 = new World("../maps/level1/Map_vertical.json", &sound_handler, false);
-  //camera.InitCamera(0, 0, 0, 100, map_level1, bitmap);
-  
-  player = new Player(map_level1, "../characters/rick.xml");
-  map_level1 = new World("../maps/level1/Map1_prueba.tmx", &sound_handler, false);
   camera.InitCamera(0, 0, CAMERA_X, CAMERA_Y, map_level1, display);
-  //player = new Player("../characters/rick.xml");
+  player = new Player(map_level1, "../characters/rick.xml");
   player->RegisterCamera(&camera);
   player->RegisterSoundHandler(&sound_handler);
 
@@ -152,10 +148,9 @@ int main(int argc, char *argv[]) {
     
     // REVISIT: added mouse to combine creation with main game
     al_get_mouse_state(&mouse_state);
-    if (mouse_state.buttons & 1)
-      //printf("Mouse coord x = %d, y = %d\n", camera.GetPosX() + mouse_state.x/2, camera.GetPosY() + mouse_state.y/2);
+    if (mouse_state.buttons & 1) printf("Mouse coord x = %d, y = %d\n", camera.GetPosX() + mouse_state.x/2, camera.GetPosY() + mouse_state.y/2);
 
-    if(keyboard.PressedESC())   { exit = true; }
+    if(keyboard.PressedESC()) exit = true;
 
     // Perform an step of all elements belonging to the world level
     ////printf("[Main] World step\n");
