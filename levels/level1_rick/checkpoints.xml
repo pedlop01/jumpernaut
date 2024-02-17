@@ -1,4 +1,5 @@
 <checkpoints>
+  <checkpoint id="0" chk_x="50" chk_y="1500" chk_width="32" chk_height="32" pl_x="0" pl_y="1550" pl_face="right" nxt_chks="1,2"></checkpoint>
   <checkpoint id="0" chk_x="264" chk_y="2000" chk_width="32" chk_height="32" pl_x="264" pl_y="2000" pl_face="right" nxt_chks="1,2"></checkpoint>
   <checkpoint id="1" chk_x="760" chk_y="2000" chk_width="32" chk_height="32" pl_x="760" pl_y="2000" pl_face="left" nxt_chks="2"></checkpoint>
   <checkpoint id="2" chk_x="780" chk_y="1790" chk_width="32" chk_height="32" pl_x="780" pl_y="1790" pl_face="right" nxt_chks="3,4"></checkpoint>

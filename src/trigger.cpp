@@ -110,7 +110,7 @@ void Trigger::TriggerStep(int _x, int _y, int _width, int _height,
 
     player_in_trigger = InTrigger(_x, _y, _width, _height);
 
-    player_enters =  player_in_trigger && !player_was_in_trigger;
+    player_enters =  player_in_trigger && !player_was_in_trigger; 
     player_stays  =  player_in_trigger &&  player_was_in_trigger;
     player_exits  = !player_in_trigger &&  player_was_in_trigger;
 

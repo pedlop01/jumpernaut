@@ -697,8 +697,7 @@ void Character::ComputeNextState(World* map, Keyboard& keyboard) {
 
         break;
 
-      case CHAR_STATE_DEAD:
-        initial_y = map->GetMapHeight()*map->GetTilesetHeight() - (height + 8); // REVISIT: should be 0
+      case CHAR_STATE_DEAD:        
         this->Reset();
         break;
       default:

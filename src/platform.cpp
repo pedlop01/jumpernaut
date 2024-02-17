@@ -41,6 +41,22 @@ Platform::Platform(const char* file,
   Object::Init(file, _x, _y, _width, _height, _visible, true, _ini_state, OBJ_DIR_STOP, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
 }
 
+void Platform::Reset() {
+
+  ini_state = ini_state;
+  x = ini_x;
+  y = ini_y;
+  current_action = actions.begin();  // REVISIT
+  current_desp = 0;
+  current_wait_time = 0;
+  state = OBJ_STATE_STOP;
+  // Trigger is false by default. Platforms moving without trigger
+  // go directly to state MOVING, so no need to use trigger
+  trigger = false;
+  cond_actions = false;
+
+}
+
 Platform::~Platform() {
   // Remove all created actions
   for(list<Action*>::iterator it = actions.begin(); it != actions.end(); it++) {
