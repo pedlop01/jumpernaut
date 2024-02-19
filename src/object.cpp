@@ -4,6 +4,7 @@
 #include "block.h"
 #include "platform.h"
 #include "enemy.h"
+#include "log.h"
 
 int Object::id = 0;
 
@@ -59,7 +60,6 @@ Object::Object() {
   obj_type = OBJ_NONE;
 
   obj_id = id;
-  //printf("Created object id = %d\n", obj_id);
   id++;
 
   initial_x = x;
@@ -109,7 +109,6 @@ Object::Object(int _x, int _y, int _width, int _height, int _visible, int _activ
   obj_type = OBJ_NONE;
 
   obj_id = id;
-  //printf("created obj id = %d\n", obj_id);
   id++;
 
   initial_x = x;
@@ -130,7 +129,6 @@ Object::~Object() {
     delete *it;
   }
   animations.clear();
-  //printf("Object destructor\n");
 }
 
 void Object::Init(const char* file,
@@ -177,26 +175,25 @@ void Object::Init(const char* file,
 
   // Read animations
   pugi::xml_parse_result result = obj_file.load_file(file);
-  if(!result) {
-      //printf("Error: loading character data from file = %s, description = %s\n", file, result.description());
+  if (!result) {
+    fprintf(stderr, "Error: loading character data from file = %s, description = %s\n", file, result.description());
   }
 
-  //printf("- Initializing object:\n");
+  jump_log_mask(LOG_INIT, "- Initializing object:\n");
   // Iterate over states
   int num_anims = 0;  
   sprintf(name, "%s", obj_file.child("object").attribute("name").as_string());
-  //printf("Object name = %s\n", name);
+  jump_log_mask(LOG_INIT, "Object name = %s\n", name);
   for (pugi::xml_node state = obj_file.child("object").child("states").first_child();
        state; state = state.next_sibling()) {
-    ////printf("State name = %s, id = %d\n", state.attribute("name").as_string(), state.attribute("id").as_int());
+    jump_log_mask(LOG_INIT, "State name = %s, id = %d\n", state.attribute("name").as_string(), state.attribute("id").as_int());
     // Create state
     pugi::xml_node animation = state.child("animation");
     // Create animation and attach to state
-    //printf("\tAnimation %d: file = %s, speed = %d\n", num_anims, animation.attribute("bitmap").as_string(), animation.attribute("speed").as_int());
+    jump_log_mask(LOG_INIT, "\tAnimation %d: file = %s, speed = %d\n", num_anims, animation.attribute("bitmap").as_string(), animation.attribute("speed").as_int());
     ALLEGRO_BITMAP* obj_bitmap = al_load_bitmap(animation.attribute("bitmap").as_string());
-    if (!obj_bitmap) {
-      //printf("Error: failed to load animation bitmap\n");
-    }
+    assert(obj_bitmap && "Error: failed to load animation bitmap\n");
+
     Animation* obj_anim = new Animation(obj_bitmap, animation.attribute("speed").as_int());
     int num_sprites = 0;
     // Traverse all sprites in the animation
@@ -206,11 +203,11 @@ void Object::Init(const char* file,
       int sprite_width  = sprite.attribute("width").as_int();
       int sprite_height = sprite.attribute("height").as_int();
 
-      //printf("\t\tSprite %d: x = %d, y = %d, width = %d, height = %d\n", num_sprites,
-                                                                        //  sprite_x,
-                                                                        //  sprite_y,
-                                                                        //  sprite_width,
-                                                                        //  sprite_height);
+      jump_log_mask(LOG_INIT, "\t\tSprite %d: x = %d, y = %d, width = %d, height = %d\n", num_sprites,
+                                                                                          sprite_x,
+                                                                                          sprite_y,
+                                                                                          sprite_width,
+                                                                                          sprite_height);
       // Set transparent color
       al_convert_mask_to_alpha(obj_bitmap, al_map_rgb(255,0,255));
       ALLEGRO_BITMAP* sprite_bitmap = al_create_sub_bitmap(obj_bitmap, sprite_x, sprite_y, sprite_width, sprite_height);
@@ -640,7 +637,6 @@ void Object::ComputeCollisions(World* map, Character* player) {
                             player->GetBBHeight()));
 
   if (playerCol) {
-    ////printf("Player colliding with obj = %d\n", obj_id);
     playerPtr = player; // There is only one player at the moment.
   }
 
@@ -672,8 +668,6 @@ void Object::UpdateFSMState(World* map) {
 }
 
 void Object::ComputeNextState(World* map) {
-  ////printf("[OBJ] ComputeNextState: state = %d direction  = %d\n", state, direction);
-
   // Save current state before computing next state
   prev_state = state;
   // Save current direction before computing next state and direction
@@ -774,18 +768,14 @@ void Object::ComputeNextSpeed() {
 }
 
 void Object::ObjectStep(World* map, Character* player) {
-//  printf("[Object] ComputeCollisions\n");
   this->ComputeCollisions(map, player);
   this->ComputeNextState(map);
-//  //printf("[Object] ComputeNextPosition\n");
   this->ComputeNextPosition(map);
-//  //printf("[Object] ComputeNextSpeed\n");
   this->ComputeNextSpeed();
   // If non-dead object then handle updates on animations.
   // This is used in some objects to control how long an animation
   // takes. For instance, an object dying like a laser, should
   // wait until the animation completes to transition to the next state.
-  //printf("[Object] ComputeAnimationStep\n");
   if (state != OBJ_STATE_DEAD) {
     if ((prev_direction != direction) && (direction == OBJ_DIR_STOP) && (obj_type != OBJ_BOMB)) {  // BOMBs are an exception!
       animations[state]->ResetAnim();
