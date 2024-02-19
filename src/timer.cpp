@@ -14,8 +14,9 @@ void Timer::StartCounter()
 {
 #ifdef __WIN32
   LARGE_INTEGER li;
-  if(!QueryPerformanceFrequency(&li))
-    //printf("QueryPerformanceFrequency failed!\n");
+  if(!QueryPerformanceFrequency(&li)) {
+    fprintf(stderr, "QueryPerformanceFrequency failed!\n");
+  }
 
   PCFreq = double(li.QuadPart)/1000.0;
 

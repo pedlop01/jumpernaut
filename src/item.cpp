@@ -12,7 +12,6 @@ Item::Item(int _type_id) {
 }
 
 Item::~Item() {
-  //printf("Calling destructor!\n");
 }
 
 void Item::UpdateFSMState(World* map) {
@@ -72,7 +71,6 @@ void Item::UpdateFSMState(World* map) {
 }
 
 void Item::ComputeNextPosition(World* map) {
-  ////printf("[ITEM] ComputeNextPosition x = %d, y = %d\n", GetX(), GetY());
 
   switch(state) {
     case OBJ_STATE_STOP:
