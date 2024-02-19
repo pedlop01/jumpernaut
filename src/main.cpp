@@ -17,6 +17,7 @@
 #include "world.h"
 #include "keyboard.h"
 #include "camera.h"
+#include "log.h"
 #include "player.h"
 #include "timer.h"
 #include "colbox.h"
@@ -50,40 +51,40 @@ int main(int argc, char *argv[]) {
 
   // Check arguments
   if(argc != 1) {
-    //printf("Error: wrong parameters. Usage: XXXX\n");
+    fprintf(stderr, "Error: wrong parameters. Usage: XXXX\n");
     exit(-1);
   }
 
   // allegro initializations
   if(!al_init()) {
-    //printf("Error: failed to initialize allegro!\n");
+    fprintf(stderr, "Error: failed to initialize allegro!\n");
     return -1;
   }
 
   if(!al_install_keyboard()) {
-    //printf("Error: failed to initialize keyboard!\n");
+    fprintf(stderr, "Error: failed to initialize keyboard!\n");
     return -1;
   }
 
   if(!al_install_mouse()) {
-    //printf("Error: failed to initialize keyboard!\n");
+    fprintf(stderr, "Error: failed to initialize keyboard!\n");
     return -1;
   }
 
   al_set_new_display_flags(ALLEGRO_WINDOWED);
   display = al_create_display(SCREEN_X, SCREEN_Y);
   if(!display) {
-    printf("Error: failed to create display!\n");
+    fprintf(stderr, "Error: failed to create display!\n");
     return -1;
   }
 
   if(!al_init_image_addon()) {
-    printf("Error: failed to load image addon!\n");
+    fprintf(stderr, "Error: failed to load image addon!\n");
     return -1;
   }
 
   if(!al_init_primitives_addon()) {
-    printf("Error: failed to initialize allegro primitives!\n");
+    fprintf(stderr, "Error: failed to initialize allegro primitives!\n");
     return -1;
   }
 
@@ -93,28 +94,28 @@ int main(int argc, char *argv[]) {
   ALLEGRO_FONT *font = al_load_ttf_font("../fonts/verdana.ttf", 8,0 );
 
   if (!font) {
-    printf("Error: Could not load 'pirulen.ttf'\n");
+    fprintf(stderr, "Error: Could not load 'pirulen.ttf'\n");
     return -1;
   }
 
   if(!al_install_audio()) {
-    printf("Error: failed to initialize audio!\n");
+    fprintf(stderr, "Error: failed to initialize audio!\n");
     return -1;
   }
 
   if(!al_init_acodec_addon()) {
-    printf("Error: failed to initialize audio codecs!\n");
+    fprintf(stderr, "Error: failed to initialize audio codecs!\n");
     return -1;
   }
 
   if(!al_reserve_samples(16)) {  // REVISIT: define this as a param?
-    printf("Error: failed to reserve samples!\n");
+    fprintf(stderr, "Error: failed to reserve samples!\n");
     return -1;
   }
 
   event_queue = al_create_event_queue();
   if(!event_queue) {
-    printf("Error: failted to create event_queue!\n");
+    fprintf(stderr, "Error: failted to create event_queue!\n");
     return -1;
   }
 
@@ -148,20 +149,17 @@ int main(int argc, char *argv[]) {
     
     // REVISIT: added mouse to combine creation with main game
     al_get_mouse_state(&mouse_state);
-    if (mouse_state.buttons & 1) printf("Mouse coord x = %d, y = %d\n", camera.GetPosX() + mouse_state.x/2, camera.GetPosY() + mouse_state.y/2);
+    if (mouse_state.buttons & 1) jump_log("Mouse coord x = %d, y = %d\n", camera.GetPosX() + mouse_state.x/2, camera.GetPosY() + mouse_state.y/2);
 
     if(keyboard.PressedESC()) exit = true;
     if(keyboard.PressedK()) player->SetKilled(map_level1);
 
     // Perform an step of all elements belonging to the world level
-    ////printf("[Main] World step\n");
-    
     map_level1->WorldStep(player);
 
     // Handle player
     player->CharacterStep(map_level1, keyboard);
 
-    ////printf("[Main] Camera positioning and drawing\n");
     camera.CameraStep(map_level1, player, font);
 
     // Check counter value for adding waiting time

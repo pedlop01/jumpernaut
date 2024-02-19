@@ -88,8 +88,6 @@ void Trigger::TriggerStep(int _x, int _y, int _width, int _height,
     return;
 
   if (!trigger_targets) {
-    ////printf("[Trigger %d] No trigger target. In analysis!\n", id);
-
     // Recursive triggers keep triggering all the time.
     // This is the same piece of code than the regular one for
     // initiating triggers. Not moved there to avoid all the 
@@ -97,7 +95,6 @@ void Trigger::TriggerStep(int _x, int _y, int _width, int _height,
     if (recursive && already_triggered) {
       steps = 0;
       trigger_targets = true;
-      ////printf("[Trigger %d] Initiate targets for this recursive trigger already triggered trigger!\n", id);
       return;
     }
       
@@ -132,7 +129,6 @@ void Trigger::TriggerStep(int _x, int _y, int _width, int _height,
     if (expected_event && expected_face) {
       steps = 0;
       trigger_targets = true;
-      ////printf("[Trigger %d] Initiate targets for this trigger!\n", id);
     }
   } else {
     int num_target = 0;
@@ -167,7 +163,6 @@ void Trigger::TriggerStep(int _x, int _y, int _width, int _height,
     }
     if (all_completed) {
       already_triggered = true;
-      ////printf("[Trigger %d] Completed targets for this trigger!\n", id);
       for (vector<TriggerTarget*>::iterator it = targets.begin(); it != targets.end(); it++) {
         TriggerTarget* trigger_target = *it;
         trigger_target->SetTriggered(false);

@@ -161,13 +161,6 @@ void Platform::PlatformStep() {
   // Handle current actions
   Action* current_action_ptr = *current_action;
   current_speed = current_action_ptr->GetSpeed();
-  ////printf("platform dir=%d, desp=%d, wait=%d cond=%d desp=%d wait_time=%d\n",
-  //  current_action_ptr->GetDirection(),
-  //  current_action_ptr->GetDesp(),
-  //  current_action_ptr->GetWait(),
-  //  current_action_ptr->GetCondition(),
-  //  current_desp,
-  //  current_wait_time);
 
   switch (current_action_ptr->GetDirection()) {    
     case OBJ_DIR_STOP:
