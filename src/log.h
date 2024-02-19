@@ -14,7 +14,7 @@ static inline bool jump_loglevel_mask(int mask)
 
 #define jump_log_mask(MASK, FMR, ...)                    \
     do {                                                 \
-        if (unlikely(jump_loglevel_mask(MASK)))          \
+        if (jump_loglevel_mask(MASK)) {                  \
             jump_log(FMR, ## __VA_ARGS__);               \
         }                                                \
     } while(0)

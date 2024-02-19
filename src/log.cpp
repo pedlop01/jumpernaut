@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-int jump_loglevel = 0xffff;
+#include "log.h"
+
+// TODO: this variable will be set via command line or text file
+int jump_loglevel = 0; // LOG_INIT;
 
 void jump_log(const char *fmt, ...)
 {
