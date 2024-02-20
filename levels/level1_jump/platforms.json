@@ -1,0 +1,90 @@
+﻿[
+    {
+        "id": 0,
+        "attributes": {
+            "file": "../designs/platforms/platforms.xml",
+            "ini_x": 200,
+            "ini_y": 1500,
+            "width": 24,
+            "height": 8,
+            "visible": 1,
+            "recursive": 1,
+            "one_use": 0,
+            "ini_state": "stop"
+        },
+        "actions": [
+            {
+                "direction": "down",
+                "desp": 64,
+                "wait": 0,
+                "speed": 1,
+                "cond": 0
+            },
+            {
+                "direction": "stop",
+                "desp": 0,
+                "wait": 50,
+                "speed": 0,
+                "cond": 0
+            },
+            {
+                "direction": "up",
+                "desp": 64,
+                "wait": 0,
+                "speed": 1,
+                "cond": 0
+            },
+            {
+                "direction": "stop",
+                "desp": 0,
+                "wait": 50,
+                "speed": 0,
+                "cond": 0
+            }
+        ]
+    },
+    {
+        "id": 1,
+        "attributes": {
+            "file": "../designs/platforms/platforms.xml",
+            "ini_x": 100,
+            "ini_y": 1400,
+            "width": 24,
+            "height": 8,
+            "visible": 1,
+            "recursive": 1,
+            "one_use": 0,
+            "ini_state": "stop"
+        },
+        "actions": [
+            {
+                "direction": "down",
+                "desp": 64,
+                "wait": 0,
+                "speed": 1,
+                "cond": 0
+            },
+            {
+                "direction": "stop",
+                "desp": 0,
+                "wait": 50,
+                "speed": 0,
+                "cond": 0
+            },
+            {
+                "direction": "up",
+                "desp": 64,
+                "wait": 0,
+                "speed": 1,
+                "cond": 0
+            },
+            {
+                "direction": "stop",
+                "desp": 0,
+                "wait": 50,
+                "speed": 0,
+                "cond": 0
+            }
+        ]
+    }
+]

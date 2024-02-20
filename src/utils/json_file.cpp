@@ -19,7 +19,7 @@ const json& JsonFileManager::getData() const {
 void JsonFileManager::read() {
     std::ifstream ifs(filename_);
     if (!ifs.is_open()) {
-        std::cerr << "Could not open file for reading: " << filename_ << std::endl;
+        fprintf(stderr,"Could not open file for reading: %s\n", filename_);
         return;
     }
 
@@ -32,7 +32,7 @@ void JsonFileManager::read() {
 void JsonFileManager::write() {
     std::ofstream ofs(filename_);
     if (!ofs.is_open()) {
-        std::cerr << "Could not open file for writing: " << filename_ << std::endl;
+        fprintf(stderr,"Could not open file for writing: %s\n", filename_);
         return;
     }
 

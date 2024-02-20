@@ -6,6 +6,7 @@
 #include "utils/json_file.h"
 #include "utils/file_loader.h"
 #include "log.h"
+#include <cassert>
 
 // class constructor
 World::World()
@@ -117,7 +118,7 @@ World::World(const char *file, SoundHandler* sound_handler, bool tileExtractedOp
 
 
   // Read platforms
-  this->InitializePlatforms("../levels/level1_jump/platforms.xml");
+  this->InitializePlatforms("../levels/level1_jump/platforms.json");
   // Read items
   //this->InitializeItems("../levels/level1_jump/items.xml", sound_handler);
   // Read dynamic background objects
@@ -191,7 +192,7 @@ void World::InitializePlatforms(const char* file) {
   float action_speed;
   int action_cond;
   int num_actions;
-  pugi::xml_document plat_file;
+  //pugi::xml_document plat_file;
 
   jump_log_mask(LOG_INIT, "---------------------------\n");
   jump_log_mask(LOG_INIT, "| Initializing platforms  |\n");
@@ -203,40 +204,48 @@ void World::InitializePlatforms(const char* file) {
   // // Save json data into var
   // const json& data = manager.getData(); 
 
-  pugi::xml_parse_result result = plat_file.load_file(file);
-
-  assert(result && "Error: loading world platform data\n");
+  JsonFileManager manager(file);
+  manager.read();
   
-  for (pugi::xml_node plat = plat_file.child("platforms").first_child();
-       plat;
-       plat = plat.next_sibling()) {
-    // First read attributes
-    platform_id = plat.attribute("id").as_int();
-    jump_log_mask(LOG_INIT, "Platform id = %d\n", platform_id);
+  // Save json data into var
+  const json& data = manager.getData();
 
-    pugi::xml_node plat_attrs = plat.child("attributes");
-    plat_ini_x = plat_attrs.attribute("ini_x").as_int();
-    plat_ini_y = plat_attrs.attribute("ini_y").as_int();
-    plat_width = plat_attrs.attribute("width").as_int();
-    plat_height = plat_attrs.attribute("height").as_int();
-    plat_visible = plat_attrs.attribute("visible").as_int();
-    plat_recursive = plat_attrs.attribute("recursive").as_int();
-    plat_one_use = plat_attrs.attribute("one_use").as_int();
-    plat_ini_state = strcmp(plat_attrs.attribute("ini_state").as_string(), "stop") == 0 ?
-                       OBJ_STATE_STOP :
-                       OBJ_STATE_MOVING;
-    jump_log_mask(LOG_INIT, " - File = %s\n", plat_attrs.attribute("file").as_string());
-    jump_log_mask(LOG_INIT, " - ini_x = %d\n", plat_ini_x);
-    jump_log_mask(LOG_INIT, " - ini_y = %d\n", plat_ini_y);
-    jump_log_mask(LOG_INIT, " - width = %d\n", plat_width);
-    jump_log_mask(LOG_INIT, " - height = %d\n", plat_height);
-    jump_log_mask(LOG_INIT, " - visible = %d\n", plat_visible);
-    jump_log_mask(LOG_INIT, " - recursive = %d\n", plat_recursive);
-    jump_log_mask(LOG_INIT, " - one_use = %d\n", plat_one_use);
-    jump_log_mask(LOG_INIT, " - ini_state = %s\n", plat_attrs.attribute("ini_state").as_string());
+  //pugi::xml_parse_result result = plat_file.load_file(file);
+
+  //assert(data && "Error: loading world platform data\n");
+
+
+  for (const auto& plat : data) {
+
+    jump_log_mask(LOG_INIT, "PLATFORM: \n", plat);
+
+
+
+    // for (pugi::xml_node plat = plat_file.child("platforms").first_child();
+    //      plat;
+    //      plat = plat.next_sibling())
+    // {
+    // First read attributes
+    platform_id = plat["id"];
+    printf("Platform id = %d\n", platform_id);
+
+
+    auto plat_attrs = plat["attributes"];
+    plat_ini_x = plat_attrs["ini_x"];
+    plat_ini_y = plat_attrs["ini_y"];
+    plat_width = plat_attrs["width"];
+    plat_height = plat_attrs["height"];
+    plat_visible = plat_attrs["visible"];
+    plat_recursive = plat_attrs["recursive"];
+    plat_one_use = plat_attrs["one_use"];
+    std::string str = plat_attrs["ini_state"];
+    const char* ini_state = str.c_str(); 
+    plat_ini_state = strcmp(ini_state, "stop") == 0 ? OBJ_STATE_STOP : OBJ_STATE_MOVING;
 
     // Create platform
-    Platform* world_platform = new Platform(plat_attrs.attribute("file").as_string(),
+    std::string strP = plat_attrs["file"];
+    const char* fileStr = strP.c_str(); 
+    Platform *world_platform = new Platform(fileStr,
                                             platform_id,
                                             plat_ini_state,
                                             plat_ini_x,
@@ -247,34 +256,31 @@ void World::InitializePlatforms(const char* file) {
                                             plat_recursive,
                                             plat_one_use);
 
-    jump_log_mask(LOG_INIT, " - actions:\n");
     num_actions = 0;
-    // Second, get actions
-    pugi::xml_node actions = plat.child("actions");
-    for (pugi::xml_node action = actions.first_child();
-         action;
-         action = action.next_sibling()) {
-      jump_log_mask(LOG_INIT, "\t - action %d:\n", num_actions);
-      if (strcmp(action.attribute("direction").as_string(), "stop") == 0) {
+    auto actions = plat["actions"];
+
+    for (const auto& action : actions) {
+
+    
+      std::string strP = action["direction"];
+      const char* direction = strP.c_str(); 
+
+      if (strcmp(direction, "stop") == 0)
+      {
         action_direction = OBJ_DIR_STOP;
-      } else if (strcmp(action.attribute("direction").as_string(), "right") == 0) {
-        action_direction = OBJ_DIR_RIGHT;
-      } else if (strcmp(action.attribute("direction").as_string(), "left") == 0) {
+      } else if (strcmp(direction, "right") == 0) {
+      action_direction = OBJ_DIR_RIGHT;
+      } else if (strcmp(direction, "left") == 0) {
         action_direction = OBJ_DIR_LEFT;
-      } else if (strcmp(action.attribute("direction").as_string(), "up") == 0) {
+      } else if (strcmp(direction, "up") == 0) {
         action_direction = OBJ_DIR_UP;
-      } else if (strcmp(action.attribute("direction").as_string(), "down") == 0) {
+      } else if (strcmp(direction, "down") == 0) {
         action_direction = OBJ_DIR_DOWN;
       }
-      action_desp = action.attribute("desp").as_int();
-      action_wait = action.attribute("wait").as_int();
-      action_speed = action.attribute("speed").as_float();      
-      action_cond = action.attribute("cond").as_int();
-      jump_log_mask(LOG_INIT, "\t\t - direction=%s\n", action.attribute("direction").as_string());
-      jump_log_mask(LOG_INIT, "\t\t - desp=%d\n", action_desp);
-      jump_log_mask(LOG_INIT, "\t\t - wait=%d\n", action_wait);
-      jump_log_mask(LOG_INIT, "\t\t - speed=%f\n", action_speed);
-      jump_log_mask(LOG_INIT, "\t\t - cond=%d\n", action_cond);
+      action_desp = action["desp"];
+      action_wait = action["wait"];
+      action_speed = action["speed"];   
+      action_cond = action["cond"];
 
       world_platform->AddAction(action_direction,
                                 action_desp,
@@ -283,6 +289,7 @@ void World::InitializePlatforms(const char* file) {
                                 action_cond);  // REVISIT: no actions for platforms yet
       num_actions++;
     }
+
     platforms.push_back(world_platform);
 
   }  
