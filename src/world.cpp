@@ -69,10 +69,9 @@ World::World(const char *file, SoundHandler* sound_handler, bool tileExtractedOp
       }
   }
 
-  // First initialize tiles
-  nlohmann::json tiles        = manager.find(data["layers"], "name", "Tiles")["data"];
-  nlohmann::json tiles_front  = manager.find(data["layers"], "name", "FrontTiles")["data"];
-  nlohmann::json tiles_prop   = manager.find(data["layers"], "name", "Collisions")["data"];
+  nlohmann::json tiles        = (*manager.findPtr(data["layers"], "name", "Tiles"))["data"];
+  nlohmann::json tiles_front  = (*manager.findPtr(data["layers"], "name", "FrontTiles"))["data"];
+  nlohmann::json tiles_prop   = (*manager.findPtr(data["layers"], "name", "Collisions"))["data"];
 
   int x = 0;
   int y = 0;
@@ -227,7 +226,6 @@ void World::InitializePlatforms(const char* file) {
     // {
     // First read attributes
     platform_id = plat["id"];
-    printf("Platform id = %d\n", platform_id);
 
 
     auto plat_attrs = plat["attributes"];

@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include "json_file.h"
+#include "log.h"
 
 using json = nlohmann::json;
 
@@ -51,7 +52,6 @@ void JsonFileManager::addEntry(const std::string& key, const json& value) {
 std::shared_ptr<nlohmann::json> JsonFileManager::findPtr(const nlohmann::json &jsonArray, const std::string &key, const std::string &value) const {
     if (jsonArray.is_array()) {
         for (const auto& item : jsonArray) {
-            std::cout << "itemmm: " << item.contains(key) << std::endl;
             if (item.is_object() && item.contains(key) && item[key] == value) {
                 return std::make_shared<nlohmann::json>(item);  // Retorna un puntero inteligente al objeto encontrado
             }

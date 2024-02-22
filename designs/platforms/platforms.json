@@ -7,12 +7,14 @@
             "animation": {
                 "bitmap": "../designs/platforms/platforms.png",
                 "speed": 0,
-                "sprite": {
-                    "x": 1,
-                    "y": 1,
-                    "width": 24,
-                    "height": 8
-                }
+                "sprite": [
+                    {
+                        "x": 1,
+                        "y": 1,
+                        "width": 24,
+                        "height": 8
+                    }
+                ]
             }
         },
         {
@@ -21,12 +23,14 @@
             "animation": {
                 "bitmap": "../designs/platforms/platforms.png",
                 "speed": 0,
-                "sprite": {
-                    "x": 1,
-                    "y": 1,
-                    "width": 24,
-                    "height": 8
-                }
+                "sprite": [
+                    {
+                        "x": 1,
+                        "y": 1,
+                        "width": 24,
+                        "height": 8
+                    }
+                ]
             }
         }
     ]
