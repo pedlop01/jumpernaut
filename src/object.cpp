@@ -5,6 +5,7 @@
 #include "platform.h"
 #include "enemy.h"
 #include "log.h"
+#include "utils/json_file.h"
 
 int Object::id = 0;
 
@@ -174,34 +175,57 @@ void Object::Init(const char* file,
                   _speed_y_max, _speed_y_min, _speed_y_step);
 
   // Read animations
-  pugi::xml_parse_result result = obj_file.load_file(file);
-  if (!result) {
-    fprintf(stderr, "Error: loading character data from file = %s, description = %s\n", file, result.description());
-  }
+  //pugi::xml_parse_result result = obj_file.load_file(file);
+
+  JsonFileManager manager(file);
+  manager.read();
+  
+  // Save json data into var
+  const json& data = manager.getData();
+
+  // if (!result) {
+  //   fprintf(stderr, "Error: loading character data from file = %s, description = %s\n", file, result.description());
+  // }
 
   jump_log_mask(LOG_INIT, "- Initializing object:\n");
   // Iterate over states
   int num_anims = 0;  
-  sprintf(name, "%s", obj_file.child("object").attribute("name").as_string());
+
+
+  //sprintf(name, "%s", obj_file.child("object").attribute("name").as_string());
+  sprintf(name, "%s", data["name"]);
   jump_log_mask(LOG_INIT, "Object name = %s\n", name);
-  for (pugi::xml_node state = obj_file.child("object").child("states").first_child();
-       state; state = state.next_sibling()) {
-    jump_log_mask(LOG_INIT, "State name = %s, id = %d\n", state.attribute("name").as_string(), state.attribute("id").as_int());
+
+  for (const auto& state : data["states"]) {
+
+  //for (pugi::xml_node state = obj_file.child("object").child("states").first_child();
+    //   state; state = state.next_sibling()) {
+    //jump_log_mask(LOG_INIT, "State name = %s, id = %d\n", state.attribute("name").as_string(), state.attribute("id").as_int());
+    jump_log_mask(LOG_INIT, "State name = %s, id = %d\n", state["name"], state["id"]);
     // Create state
-    pugi::xml_node animation = state.child("animation");
+    //pugi::xml_node animation = state.child("animation");
+    const json &animation = state["animation"];
+
+    std::string bitmapStr = animation["bitmap"];
+    const char* bitmap = bitmapStr.c_str(); 
     // Create animation and attach to state
-    jump_log_mask(LOG_INIT, "\tAnimation %d: file = %s, speed = %d\n", num_anims, animation.attribute("bitmap").as_string(), animation.attribute("speed").as_int());
-    ALLEGRO_BITMAP* obj_bitmap = al_load_bitmap(animation.attribute("bitmap").as_string());
+    // jump_log_mask(LOG_INIT, "\tAnimation %d: file = %s, speed = %d\n", num_anims, animation.attribute("bitmap").as_string(), animation.attribute("speed").as_int());
+    jump_log_mask(LOG_INIT, "\tAnimation %d: file = %s, speed = %d\n", num_anims, bitmap, animation["speed"]);
+    
+    //ALLEGRO_BITMAP* obj_bitmap = al_load_bitmap(animation.attribute("bitmap").as_string());
+    ALLEGRO_BITMAP* obj_bitmap = al_load_bitmap(bitmap);
     assert(obj_bitmap && "Error: failed to load animation bitmap\n");
 
-    Animation* obj_anim = new Animation(obj_bitmap, animation.attribute("speed").as_int());
+    //Animation* obj_anim = new Animation(obj_bitmap, animation.attribute("speed").as_int());
+    Animation* obj_anim = new Animation(obj_bitmap, animation["speed"]);
     int num_sprites = 0;
     // Traverse all sprites in the animation
-    for (pugi::xml_node sprite = animation.first_child(); sprite; sprite = sprite.next_sibling()) {
-      int sprite_x      = sprite.attribute("x").as_int();
-      int sprite_y      = sprite.attribute("y").as_int();
-      int sprite_width  = sprite.attribute("width").as_int();
-      int sprite_height = sprite.attribute("height").as_int();
+    for (const auto& sprite : animation["sprite"]) {
+    //for (pugi::xml_node sprite = animation.first_child(); sprite; sprite = sprite.next_sibling()) {
+      int sprite_x      = sprite["x"];
+      int sprite_y      = sprite["y"];
+      int sprite_width  = sprite["width"];
+      int sprite_height = sprite["height"];
 
       jump_log_mask(LOG_INIT, "\t\tSprite %d: x = %d, y = %d, width = %d, height = %d\n", num_sprites,
                                                                                           sprite_x,

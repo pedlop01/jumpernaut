@@ -1,0 +1,13 @@
+[
+    {
+        "id": 0,
+        "chk_x": 1,
+        "chk_y": 1550,
+        "chk_width": 32,
+        "chk_height": 32,
+        "pl_x": 1,
+        "pl_y": 1550,
+        "pl_face": "right",
+        "nxt_chks": ""
+    }
+]

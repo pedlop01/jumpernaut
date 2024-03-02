@@ -15,6 +15,7 @@ endif
 # Folders and files
 SRC_DIR := ../src
 UTILS_DIR := $(SRC_DIR)/utils
+INCLUDE_DIR := $(SRC_DIR) # Agregar esta línea para definir el directorio de include
 SRC_FILES := $(wildcard $(SRC_DIR)/*.cpp) $(wildcard $(UTILS_DIR)/*.cpp)
 OBJ_FILES := $(patsubst $(SRC_DIR)/%.cpp,%.o,$(wildcard $(SRC_DIR)/*.cpp)) $(patsubst $(UTILS_DIR)/%.cpp,%.o,$(wildcard $(UTILS_DIR)/*.cpp))
 
@@ -24,10 +25,10 @@ rick2: $(OBJ_FILES)
 
 # Object compile rules
 %.o: $(SRC_DIR)/%.cpp
-	g++ $(CXXFLAGS) -c $< -o $@
+	g++ $(CXXFLAGS) -I$(INCLUDE_DIR) -c $< -o $@
 
 %.o: $(UTILS_DIR)/%.cpp
-	g++ $(CXXFLAGS) -c $< -o $@
+	g++ $(CXXFLAGS) -I$(INCLUDE_DIR) -c $< -o $@
 
 clean:
 	rm -f *.o rick2
