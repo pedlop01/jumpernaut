@@ -127,7 +127,7 @@ void Camera::DrawBackTiles(World* world, Character* player, ALLEGRO_FONT *font) 
 
     int tile_x = pos_x / tile_width;
     for (int x = 0; x < tiles_width_corrected; x++) {
-
+      
       tile = map->GetTile(tile_x, tile_y);
       if (tile->GetValue() != 0) {
         left_up_x = tile->GetLeftUpX();
@@ -136,7 +136,8 @@ void Camera::DrawBackTiles(World* world, Character* player, ALLEGRO_FONT *font) 
         int dest_x = x*tile_width - correct_x;
         int dest_y = y*tile_height - correct_y;
     
-        if ((dest_x < view_width) && (dest_y < view_height)) {        
+        if ((dest_x < view_width) && (dest_y < view_height)) {
+          //std::cout << "tile pos: " << y << " ; " << x << " :: " << tile->GetValue() << std::endl;
           al_draw_bitmap_region(tileset_bitmap,
                                 left_up_x,
                                 left_up_y,
@@ -508,10 +509,12 @@ void Camera::DrawScreen(World* world, Character* player, ALLEGRO_FONT *font) {
   // Draw camera views
   this->DrawCameraViews(map, player, font);
 
+
   al_set_target_bitmap(al_get_backbuffer(display));
   al_draw_scaled_bitmap(camera_bitmap,
                         0, 0, pixels_width, pixels_height,
                         0, 0, SCREEN_X, SCREEN_Y, 0);
+                        
 
   steps_drawing++;
 }

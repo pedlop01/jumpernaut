@@ -7,6 +7,7 @@
 #include "utils/file_loader.h"
 #include "log.h"
 #include <cassert>
+#include <stdlib.h>
 
 // class constructor
 World::World()
@@ -21,7 +22,7 @@ World::World(const char *file, SoundHandler* sound_handler, bool tileExtractedOp
 
   JsonFileManager manager(file);
   manager.read();
-  
+
   // Save json data into var
   const json& data = manager.getData();
 
@@ -35,14 +36,21 @@ World::World(const char *file, SoundHandler* sound_handler, bool tileExtractedOp
   tileset_height = data["tileheight"];
   std::cout << map_width << " .... " << map_height << std::endl;
 
+
   std::string file_name;
+
   if (data.contains("tilesets") && data["tilesets"].is_array()) {
-    const json &tileset = data["tilesets"][0];
-    file_name = tileset["name"].get<std::string>();
+
+    //const json &tileset = data["tilesets"][0];
+    nlohmann::json tileset = (*manager.findPtr(data["tilesets"], "name", "Tileset"));
+
+    file_name = tileset["image"];
+
     tileset_count = tileset["tilecount"];
     tileset_columns = tileset["columns"];
     tileset_tile_width = tileset["tilewidth"];
     tileset_tile_height = tileset["tileheight"];
+
   }
 
 
@@ -52,6 +60,8 @@ World::World(const char *file, SoundHandler* sound_handler, bool tileExtractedOp
   world_image = al_load_bitmap(tileset_file);
   assert(world_image && "Error: failed to load tileset\n");
 
+  std::cout << "tileset file" << tileset_file << std::endl;
+  jump_log_mask(LOG_INIT, "tileset file %s\n", tileset_file);
   // Set transparent color for tileset
   al_convert_mask_to_alpha(world_image, al_map_rgb(255,0,255));
 
@@ -59,6 +69,7 @@ World::World(const char *file, SoundHandler* sound_handler, bool tileExtractedOp
   // Initialize world    
   world_tiles = new Tile**[map_width];
   world_tiles_front = new Tile**[map_width];
+
   
   for (int x = 0 ; x < map_width ; x++ ) {
       world_tiles[x] = new Tile*[map_height];
@@ -86,18 +97,28 @@ World::World(const char *file, SoundHandler* sound_handler, bool tileExtractedOp
     int tile_attr = tiles[i];
     int tile_front_attr = tiles_front[i];
     int prop_attr = tiles_prop[i];
+    
 
-    int tile_id       = ((tile_attr != 0) ? tile_attr - 1: tile_attr);
-    int tile_front_id = ((tile_front_attr != 0) ? tile_front_attr - 1: tile_front_attr);
-    int tile_prop     = ((prop_attr != 0) ? prop_attr - 1: prop_attr);
+    // int tile_id       = ((tile_attr != 0) ? tile_attr - 1: tile_attr);
+    // int tile_front_id = ((tile_front_attr != 0) ? tile_front_attr - 1: tile_front_attr);
+    // int tile_prop     = ((prop_attr != 0) ? prop_attr - 1: prop_attr);
+
+    // int tile_id       = tile_attr != 0 ? tile_attr -1: lastTile_attr;
+    // int tile_front_id = tile_front_attr != 0 ? tile_front_attr-1: lastTileFront_attr;
+    // int tile_prop     = prop_attr != 0 ? prop_attr -1: lastProp_attr;
+
+    int tile_id       = tile_attr;
+    int tile_front_id = tile_front_attr;
+    int tile_prop     = prop_attr;
     
     // Save the id of the tile aswell as the coordinates in the tileset bitmap
     world_tiles[x][y]->SetValue(tile_id);
     world_tiles[x][y]->SetType(tile_prop);
-    world_tiles[x][y]->SetLeftUpX((tile_id % tileset_columns) * tileset_width);
+    world_tiles[x][y]->SetLeftUpX((tile_id % tileset_columns) * tileset_width - tileset_width);
     world_tiles[x][y]->SetLeftUpY(ceil(tile_id/tileset_columns)*tileset_height);
     world_tiles[x][y]->SetRightDownX((tile_id % tileset_columns) * tileset_width + tileset_width);
     world_tiles[x][y]->SetRightDownY(ceil((tile_id/tileset_columns))*tileset_height + tileset_height);
+
     // Same for tiles in front
     world_tiles_front[x][y]->SetValue(tile_front_id);
     world_tiles_front[x][y]->SetType(tile_prop);
@@ -105,7 +126,6 @@ World::World(const char *file, SoundHandler* sound_handler, bool tileExtractedOp
     world_tiles_front[x][y]->SetLeftUpY(ceil(tile_front_id/tileset_columns)*tileset_height);
     world_tiles_front[x][y]->SetRightDownX((tile_front_id % tileset_columns) * tileset_width + tileset_width);
     world_tiles_front[x][y]->SetRightDownY(ceil((tile_front_id/tileset_columns))*tileset_height + tileset_height);
-
 
     if (x == (map_width - 1)) {
       y++;
@@ -117,7 +137,7 @@ World::World(const char *file, SoundHandler* sound_handler, bool tileExtractedOp
 
 
   // Read platforms
-  this->InitializePlatforms("../levels/level1_jump/platforms.json");
+  //this->InitializePlatforms("../levels/level1_jump/platforms.json");
   // Read items
   //this->InitializeItems("../levels/level1_jump/items.xml", sound_handler);
   // Read dynamic background objects
@@ -131,7 +151,7 @@ World::World(const char *file, SoundHandler* sound_handler, bool tileExtractedOp
   // Read lasers
   //this->InitializeLasers("../levels/level1_jump/lasers.xml");
   // Read triggers
-  this->InitializeTriggers("../levels/level1_jump/triggers.xml");
+  //this->InitializeTriggers("../levels/level1_jump/triggers.xml");
   // Read enemies
   //this->InitializeEnemies("../levels/level1_jump/enemies.xml");
   // Read camera views

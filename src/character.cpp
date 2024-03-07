@@ -109,22 +109,26 @@ Character::Character(const char* file) {
   // state also requires synchronizing with the state id in the code.
 
   jump_log_mask(LOG_INIT, "- Initializing player:\n");
+
   // Iterate over states
   int num_anims = 0;
   for (pugi::xml_node state = character_file.child("character").child("states").first_child();
        state; state = state.next_sibling()) {
-    jump_log_mask(LOG_INIT, "State name = %s, id = %d\n", state.attribute("name").as_string(), state.attribute("id").as_int());
+
     // Create state
     pugi::xml_node animation = state.child("animation");
     // Create animation and attach to state
-    jump_log_mask(LOG_INIT, "\tAnimation %d: file = %s, speed = %d\n", num_anims, animation.attribute("bitmap").as_string(), animation.attribute("speed").as_int());
+    //jump_log_mask(LOG_INIT, "\tAnimation %d: file = %s, speed = %d\n", num_anims, animation.attribute("bitmap").as_string(), animation.attribute("speed").as_int());
+    
     ALLEGRO_BITMAP* anim_bitmap = al_load_bitmap(animation.attribute("bitmap").as_string());
     assert(anim_bitmap && "Error: failed to load animation bitmap\n");
+
 
     Animation* player_anim = new Animation(anim_bitmap, animation.attribute("speed").as_int());
     int num_sprites = 0;
     // Traverse all sprites in the animation
     for (pugi::xml_node sprite = animation.first_child(); sprite; sprite = sprite.next_sibling()) {
+
       int sprite_x      = sprite.attribute("x").as_int();
       int sprite_y      = sprite.attribute("y").as_int();
       int sprite_width  = sprite.attribute("width").as_int();
@@ -136,6 +140,7 @@ Character::Character(const char* file) {
                                                                                           sprite_width,
                                                                                           sprite_height);
 
+
       ALLEGRO_BITMAP* sprite_bitmap = al_create_sub_bitmap(anim_bitmap, sprite_x, sprite_y, sprite_width, sprite_height);
       al_convert_mask_to_alpha(sprite_bitmap, al_map_rgb(255,0,255));
 
@@ -143,7 +148,7 @@ Character::Character(const char* file) {
                              sprite_x,
                              sprite_y,
                              sprite_width,
-                             sprite_height);      
+                             sprite_height);
     }
     animations.push_back(player_anim);
   }

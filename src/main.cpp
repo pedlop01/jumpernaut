@@ -122,9 +122,9 @@ int main(int argc, char *argv[]) {
   al_register_event_source(event_queue, al_get_keyboard_event_source());
 
   // Game initializations  
-  map_level1 = new World("../maps/level1_jump/Map_vertical_16x16.json", &sound_handler, false);
-  camera.InitCamera(0, 0, CAMERA_X, CAMERA_Y, map_level1, display);
-  player = new Player(map_level1, "../characters/rick.xml");
+  map_level1 = new World("../maps/level1_jump/level1.json", &sound_handler, false);
+  camera.InitCamera(0, 0, 512, 512, map_level1, display);
+  player = new Player(map_level1, "../characters/rick/rick.xml");
   player->RegisterCamera(&camera);
   player->RegisterSoundHandler(&sound_handler);
 
@@ -145,6 +145,7 @@ int main(int argc, char *argv[]) {
   // Main loop
   bool exit = false;
   do {
+    
     keyboard.ReadKeyboard(event_queue);
     
     // REVISIT: added mouse to combine creation with main game
