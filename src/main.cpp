@@ -123,8 +123,8 @@ int main(int argc, char *argv[]) {
 
   // Game initializations  
   map_level1 = new World("../maps/level1_jump/level1.json", &sound_handler, false);
-  camera.InitCamera(0, 0, 512, 512, map_level1, display);
-  player = new Player(map_level1, "../characters/rick/rick.xml");
+  camera.InitCamera(0, 0, 320, 320, map_level1, display);
+  player = new Player(map_level1, "../characters/jump/Biker.json");
   player->RegisterCamera(&camera);
   player->RegisterSoundHandler(&sound_handler);
 
@@ -133,7 +133,7 @@ int main(int argc, char *argv[]) {
 
   // Initialize sounds and start playing music for level 1 (the only implemented at this moment)
   sound_handler.InitializeSounds();
-  sound_handler.PlayMusic(0);
+  //sound_handler.PlayMusic(0);
 
 
 

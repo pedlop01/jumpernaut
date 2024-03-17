@@ -1,6 +1,7 @@
 #include "character.h" // class's header file
 #include "camera.h"
 #include "log.h"
+#include "utils/json_file.h"
 
 // class constructor
 Character::Character() {
@@ -99,10 +100,10 @@ Character::Character(const char* file) {
   camera = nullptr;
 
   // Initialize animations
-  pugi::xml_parse_result result = character_file.load_file(file);
-  if (!result) {
-    fprintf(stderr, "Error: loading character data from file = %s, description = %s\n", file, result.description());
-  }
+  // pugi::xml_parse_result result = character_file.load_file(file);
+  // if (!result) {
+  //   fprintf(stderr, "Error: loading character data from file = %s, description = %s\n", file, result.description());
+  // }
 
   // REVISIT: states are taking in order from the file. It would be better to find
   // a way to insert them by id instead. However, giving an id to the xml
@@ -112,34 +113,50 @@ Character::Character(const char* file) {
 
   // Iterate over states
   int num_anims = 0;
-  for (pugi::xml_node state = character_file.child("character").child("states").first_child();
-       state; state = state.next_sibling()) {
 
-    // Create state
-    pugi::xml_node animation = state.child("animation");
-    // Create animation and attach to state
-    //jump_log_mask(LOG_INIT, "\tAnimation %d: file = %s, speed = %d\n", num_anims, animation.attribute("bitmap").as_string(), animation.attribute("speed").as_int());
-    
-    ALLEGRO_BITMAP* anim_bitmap = al_load_bitmap(animation.attribute("bitmap").as_string());
+  
+  JsonFileManager manager(file);
+  manager.read();
+  // Save json data into var
+  const json& data = manager.getData();
+
+  int sprite_width = data["width"];
+  int sprite_height = data["height"];
+
+  nlohmann::json states = data["states"];
+  std::cout << states << std::endl;
+
+  SetAdjustment(data["adjustment"]);
+
+  for (const auto& state : data["states"]) {
+    nlohmann::json animation = state["animation"];
+    std::string bitmapStr = animation["bitmap"];
+    ALLEGRO_BITMAP* anim_bitmap = al_load_bitmap(bitmapStr.c_str());
     assert(anim_bitmap && "Error: failed to load animation bitmap\n");
 
+    int speed = animation["speed"];
 
-    Animation* player_anim = new Animation(anim_bitmap, animation.attribute("speed").as_int());
+    Animation* player_anim = new Animation(anim_bitmap,speed);
     int num_sprites = 0;
-    // Traverse all sprites in the animation
-    for (pugi::xml_node sprite = animation.first_child(); sprite; sprite = sprite.next_sibling()) {
 
-      int sprite_x      = sprite.attribute("x").as_int();
-      int sprite_y      = sprite.attribute("y").as_int();
-      int sprite_width  = sprite.attribute("width").as_int();
-      int sprite_height = sprite.attribute("height").as_int();
+    int frames = animation["frames"];
 
-      jump_log_mask(LOG_INIT, "\t\tSprite %d: x = %d, y = %d, width = %d, height = %d\n", num_sprites,
-                                                                                          sprite_x,
-                                                                                          sprite_y,
-                                                                                          sprite_width,
-                                                                                          sprite_height);
+    int sprite_x = animation["x"];
+    int sprite_y = animation["y"];
+    
+    for (size_t i = 0; i < frames; i++)   {
+                             
+      sprite_x =  i * sprite_width;    
 
+      //  //int sprite_y = sprite_y i * sprite_height;
+      // jump_log_mask(LOG_INIT, "\t\tSprite %d: x = %d, y = %d, width = %d, height = %d\n", num_sprites,
+      //                                                                                     sprite_x,
+      //                                                                                     sprite_y,
+      //                                                                                     sprite_width,
+      //                                                                                     sprite_height);
+
+
+      std::cout << "VVVV: " << num_sprites << " :: " << sprite_x <<  std::endl;
 
       ALLEGRO_BITMAP* sprite_bitmap = al_create_sub_bitmap(anim_bitmap, sprite_x, sprite_y, sprite_width, sprite_height);
       al_convert_mask_to_alpha(sprite_bitmap, al_map_rgb(255,0,255));
@@ -149,9 +166,58 @@ Character::Character(const char* file) {
                              sprite_y,
                              sprite_width,
                              sprite_height);
+
+
     }
     animations.push_back(player_anim);
   }
+
+
+    
+
+  // for (pugi::xml_node state = character_file.child("character").child("states").first_child();
+  //      state; state = state.next_sibling()) {
+
+  //   // Create state
+  //   pugi::xml_node animation = state.child("animation");
+  //   // Create animation and attach to state
+  //   //jump_log_mask(LOG_INIT, "\tAnimation %d: file = %s, speed = %d\n", num_anims, animation.attribute("bitmap").as_string(), animation.attribute("speed").as_int());
+    
+  //   ALLEGRO_BITMAP* anim_bitmap = al_load_bitmap(animation.attribute("bitmap").as_string());
+  //   assert(anim_bitmap && "Error: failed to load animation bitmap\n");
+
+
+  //   Animation* player_anim = new Animation(anim_bitmap, animation.attribute("speed").as_int());
+  //   int num_sprites = 0;
+  //   // Traverse all sprites in the animation
+  //   for (pugi::xml_node sprite = animation.first_child(); sprite; sprite = sprite.next_sibling()) {
+
+  //     int sprite_x      = sprite.attribute("x").as_int();
+  //     int sprite_y      = sprite.attribute("y").as_int();
+  //     int sprite_width  = sprite.attribute("width").as_int();
+  //     int sprite_height = sprite.attribute("height").as_int();
+
+  //     jump_log_mask(LOG_INIT, "\t\tSprite %d: x = %d, y = %d, width = %d, height = %d\n", num_sprites,
+  //                                                                                         sprite_x,
+  //                                                                                         sprite_y,
+  //                                                                                         sprite_width,
+  //                                                                                         sprite_height);
+
+
+  //     ALLEGRO_BITMAP* sprite_bitmap = al_create_sub_bitmap(anim_bitmap, sprite_x, sprite_y, sprite_width, sprite_height);
+  //     al_convert_mask_to_alpha(sprite_bitmap, al_map_rgb(255,0,255));
+
+  //     player_anim->AddSprite(sprite_bitmap,
+  //                            sprite_x,
+  //                            sprite_y,
+  //                            sprite_width,
+  //                            sprite_height);
+  //   }
+  //   animations.push_back(player_anim);
+  // }
+
+
+
 }
 
 // class destructor
@@ -721,6 +787,13 @@ void Character::ComputeNextState(World* map, Keyboard& keyboard) {
     stepsInDirectionY = 0;
   }
 
+  if ((face != CHAR_DIR_LEFT) && (direction & CHAR_DIR_LEFT)){
+     SetPosX(map, GetPosX() - GetAdjustment());
+  } else if  ((face != CHAR_DIR_RIGHT) && (direction & CHAR_DIR_RIGHT)){
+     SetPosX(map, GetPosX() + GetAdjustment());
+  }
+
+ 
   // keep last direction in face
   if (direction & CHAR_DIR_LEFT) {
     face = CHAR_DIR_LEFT;
@@ -984,4 +1057,9 @@ int Character::GetCurrentAnimationHeight() {
 
 float Character::GetCurrentAnimationScalingFactor() {
   return animation_scaling_factor;
+}
+
+
+void Character::SetAdjustment(int v) {
+  adjustment = v;
 }

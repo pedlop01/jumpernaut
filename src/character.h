@@ -92,6 +92,8 @@ class Character {
     int  initial_speed_y;
     int  initial_state;
 
+    int adjustment;
+
     bool stop_move_block_col;
 
     float animation_scaling_factor;
@@ -139,6 +141,9 @@ class Character {
 
     int  GetCorrectedPosX();
     int  GetCorrectedPosY();
+
+    int GetAdjustment() { return adjustment; }
+    void SetAdjustment(int v);
 
     void GetCollisionsByCoords(World* map, Colbox &mask_col, int left_up_x, int left_up_y, int right_down_x, int right_down_y);
     void GetCollisionsExternalBoxExt(World* map, Colbox &mask_col);

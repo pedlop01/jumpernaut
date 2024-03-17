@@ -98,14 +98,9 @@ World::World(const char *file, SoundHandler* sound_handler, bool tileExtractedOp
     int tile_front_attr = tiles_front[i];
     int prop_attr = tiles_prop[i];
     
-
     // int tile_id       = ((tile_attr != 0) ? tile_attr - 1: tile_attr);
     // int tile_front_id = ((tile_front_attr != 0) ? tile_front_attr - 1: tile_front_attr);
     // int tile_prop     = ((prop_attr != 0) ? prop_attr - 1: prop_attr);
-
-    // int tile_id       = tile_attr != 0 ? tile_attr -1: lastTile_attr;
-    // int tile_front_id = tile_front_attr != 0 ? tile_front_attr-1: lastTileFront_attr;
-    // int tile_prop     = prop_attr != 0 ? prop_attr -1: lastProp_attr;
 
     int tile_id       = tile_attr;
     int tile_front_id = tile_front_attr;
@@ -116,7 +111,10 @@ World::World(const char *file, SoundHandler* sound_handler, bool tileExtractedOp
     world_tiles[x][y]->SetType(tile_prop);
     world_tiles[x][y]->SetLeftUpX((tile_id % tileset_columns) * tileset_width - tileset_width);
     world_tiles[x][y]->SetLeftUpY(ceil(tile_id/tileset_columns)*tileset_height);
-    world_tiles[x][y]->SetRightDownX((tile_id % tileset_columns) * tileset_width + tileset_width);
+
+    // REVISIT: + tileset_width has been removed, check if it's working properly
+    world_tiles[x][y]->SetRightDownX((tile_id % tileset_columns) * tileset_width);
+    
     world_tiles[x][y]->SetRightDownY(ceil((tile_id/tileset_columns))*tileset_height + tileset_height);
 
     // Same for tiles in front
