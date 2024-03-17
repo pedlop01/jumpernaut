@@ -1,0 +1,107 @@
+{
+    "name": "biker",
+    "width": 48,
+    "height": 48,
+    "adjustment": 15,
+    "states": [
+        {
+            "name": "RICK_STATE_STOP",
+            "id": 0,
+            "animation": {
+                "bitmap": "../characters/jump/Biker/Biker_idle.png",
+                "x": 0,
+                "y": 0,
+                "speed": 1,
+                "frames": 4
+            }
+        },
+        {
+            "name": "RICK_STATE_JUMPING",
+            "id": 1,
+            "animation": {
+                "bitmap": "../characters/jump/Biker/Biker_jump.png",
+                "x": 0,
+                "y": 0,
+                "speed": 8,
+                "frames": 4
+            }
+        },
+        {
+            "name": "RICK_STATE_RUNNING",
+            "id": 2,
+            "animation": {
+                "bitmap": "../characters/jump/Biker/Biker_run.png",
+                "x": 0,
+                "y": 0,
+                "speed": 3,
+                "frames": 6
+            }
+        },
+        {
+            "name": "RICK_STATE_CLIMBING",
+            "id": 3,
+            "animation": {
+                "bitmap": "../characters/jump/Biker/Biker_climb.png",
+                "x": 0,
+                "y": 0,
+                "speed": 3,
+                "frames": 6
+            }
+        },
+        {
+            "name": "RICK_STATE_CROUCHING",
+            "id": 3,
+            "animation": {
+                "bitmap": "../characters/jump/Biker/Biker_sitdown.png",
+                "x": 0,
+                "y": 0,
+                "speed": 3,
+                "frames": 4
+            }
+        },
+        {
+            "name": "RICK_STATE_SHOOTING",
+            "id": 3,
+            "animation": {
+                "bitmap": "../characters/jump/Biker/Biker_attack1.png",
+                "x": 0,
+                "y": 0,
+                "speed": 3,
+                "frames": 6
+            }
+        },
+        {
+            "name": "RICK_STATE_BOMBING",
+            "id": 3,
+            "animation": {
+                "bitmap": "../characters/jump/Biker/Biker_attack3.png",
+                "x": 0,
+                "y": 0,
+                "speed": 3,
+                "frames": 8
+            }
+        },
+        {
+            "name": "RICK_STATE_HITTING",
+            "id": 3,
+            "animation": {
+                "bitmap": "../characters/jump/Biker/Biker_attack2.png",
+                "x": 0,
+                "y": 0,
+                "speed": 3,
+                "frames": 6
+            }
+        },
+        {
+            "name": "RICK_STATE_DYING",
+            "id": 3,
+            "animation": {
+                "bitmap": "../characters/jump/Biker/Biker_death.png",
+                "x": 0,
+                "y": 0,
+                "speed": 3,
+                "frames": 6
+            }
+        }
+    ]
+}
