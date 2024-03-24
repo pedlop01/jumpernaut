@@ -122,6 +122,7 @@ Character::Character(const char* file) {
 
   int sprite_width = data["width"];
   int sprite_height = data["height"];
+  int sprite_real_width = data["real_width"];
 
   nlohmann::json states = data["states"];
   std::cout << states << std::endl;
@@ -158,13 +159,13 @@ Character::Character(const char* file) {
 
       std::cout << "VVVV: " << num_sprites << " :: " << sprite_x <<  std::endl;
 
-      ALLEGRO_BITMAP* sprite_bitmap = al_create_sub_bitmap(anim_bitmap, sprite_x, sprite_y, sprite_width, sprite_height);
+      ALLEGRO_BITMAP* sprite_bitmap = al_create_sub_bitmap(anim_bitmap, sprite_x, sprite_y, sprite_real_width, sprite_height);
       al_convert_mask_to_alpha(sprite_bitmap, al_map_rgb(255,0,255));
 
       player_anim->AddSprite(sprite_bitmap,
                              sprite_x,
                              sprite_y,
-                             sprite_width,
+                             sprite_real_width,
                              sprite_height);
 
 
@@ -787,12 +788,7 @@ void Character::ComputeNextState(World* map, Keyboard& keyboard) {
     stepsInDirectionY = 0;
   }
 
-  if ((face != CHAR_DIR_LEFT) && (direction & CHAR_DIR_LEFT)){
-     SetPosX(map, GetPosX() - GetAdjustment());
-  } else if  ((face != CHAR_DIR_RIGHT) && (direction & CHAR_DIR_RIGHT)){
-     SetPosX(map, GetPosX() + GetAdjustment());
-  }
-
+  std::cout << "POS X : " << GetPosX() << std::endl;
  
   // keep last direction in face
   if (direction & CHAR_DIR_LEFT) {

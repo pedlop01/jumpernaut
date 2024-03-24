@@ -75,7 +75,8 @@ void Camera::SetPosX(int _pos_x) {
     pos_x = (view_x + view_width - camera_width);
   } else {
     pos_x = _pos_x;
-}
+  }
+
 }
 
 void Camera::SetPosY(int _pos_y) {

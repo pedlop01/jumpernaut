@@ -1,8 +1,8 @@
 {
     "name": "biker",
     "width": 48,
+    "real_width": 32,
     "height": 48,
-    "adjustment": 15,
     "states": [
         {
             "name": "RICK_STATE_STOP",
