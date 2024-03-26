@@ -127,7 +127,6 @@ Character::Character(const char* file) {
   nlohmann::json states = data["states"];
   std::cout << states << std::endl;
 
-  SetAdjustment(data["adjustment"]);
 
   for (const auto& state : data["states"]) {
     nlohmann::json animation = state["animation"];
@@ -606,7 +605,7 @@ void Character::ComputeNextState(World* map, Keyboard& keyboard) {
               state = CHAR_STATE_RUNNING;
               direction = CHAR_DIR_LEFT;
             } else {
-              height = 15;                             // REVISIT: Hard-coded. Need to be obtained from state (now it is in animation)              
+              height = 48;                             // REVISIT: Hard-coded. Need to be obtained from state (now it is in animation)              
               bb_height = height;                      // REVISIT: think on how to adapt this
               pos_y = pos_y + (height_orig - height);
               state = CHAR_STATE_CROUCHING;
@@ -657,7 +656,7 @@ void Character::ComputeNextState(World* map, Keyboard& keyboard) {
       case CHAR_STATE_CROUCHING:
         if ((!collisionHeadOrig && !keyboard.PressedDown()) || inAir) {          
           pos_y = pos_y - (height_orig - height);
-          height = 21;                            // REVISIT: Hard-coded. Need to be obtained from state (now it is in animation)
+          height = 48;                            // REVISIT: Hard-coded. Need to be obtained from state (now it is in animation)
           bb_height = height;                     // REVISIT: think on how to adapt this
           state = CHAR_STATE_STOP;
         }
@@ -1055,7 +1054,3 @@ float Character::GetCurrentAnimationScalingFactor() {
   return animation_scaling_factor;
 }
 
-
-void Character::SetAdjustment(int v) {
-  adjustment = v;
-}
